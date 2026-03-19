@@ -40,13 +40,19 @@ class DemographicsSurvey extends StatefulWidget {
 }
 
 class _DemographicsSurveyState extends State<DemographicsSurvey> {
-  
+  late final ExperimentLogger _logger;
   TextEditingController ageInputController = TextEditingController();
   TextEditingController predispotionsController = TextEditingController();
 
   int age = -1;
   Gender? genderChoice;
   
+  @override
+  void initState() {
+    super.initState();
+    _logger = ExperimentLogger();
+  }
+
   @override
   Widget build(BuildContext context){
     return PlatformScaffold(
@@ -167,12 +173,11 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
     results["gender"] = genderChoice.toString().split(".")[1];
     results["predispositions"] = predispotionsController.text;
 
-    final logger = ExperimentLogger();
     final prefix = "${widget.protocol.sessionId}_survey_${DateTime.now()}_";
-    await logger.startLogging(prefix, false);
+    await _logger.startLogging(prefix, false);
 
     for (var entry in results.entries) {
-      logger.logOtherEvent(
+      _logger.logOtherEvent(
         0,
         "SurveyResults",
         entry.key,
@@ -180,7 +185,7 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
       );
     }
 
-    await logger.stopAndWriteLogging(false);
+    await _logger.stopAndWriteLogging(false);
 
     if (context.mounted) {
       Navigator.pushReplacement(
@@ -189,6 +194,7 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
           context: context,
           builder: (_) => StudyRunner(
             protocol: widget.protocol,
+            logger: _logger,
             leftWearable: widget.leftWearable,
             rightWearable: widget.rightWearable,
             leftConfigProvider: widget.leftConfigProvider,

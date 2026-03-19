@@ -5,14 +5,9 @@ import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
 class InstructionScreen extends StatelessWidget {
   final String heading;
   final String description;
-  final String? pathToImage;
+  
   final VoidCallback onNext;
   final VoidCallback onLeaveStudy;
-  final bool debugMode;
-  final List<StudyStep> studySteps;
-  final List<int> studyStepsOriginalIndices; // neu
-  final int currentOverallIndex; // statt currentStepIndex
-  final void Function(int index) onJumpToStep; // erwartet ORIGINAL index
 
   const InstructionScreen({
     super.key,
@@ -20,65 +15,7 @@ class InstructionScreen extends StatelessWidget {
     required this.description,
     required this.onNext,
     required this.onLeaveStudy,
-    this.pathToImage,
-    this.debugMode = false,
-    required this.studySteps,
-    required this.studyStepsOriginalIndices,
-    required this.currentOverallIndex,
-    required this.onJumpToStep,
   });
-
-  Widget _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.grey,
-            ),
-            child: Text(
-              'Overview',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-              ),
-            ),
-          ),
-          // Generiere die Listenelemente für jeden Schritt
-          ...studySteps.asMap().entries.map((entry) {
-            final localIndex = entry.key; // index in der gefilterten Liste
-            final step = entry.value;
-            final originalIndex =
-                studyStepsOriginalIndices[localIndex]; // ORIGINAL
-            final isCompleted = originalIndex < currentOverallIndex;
-            final isCurrent = originalIndex == currentOverallIndex;
-
-            return ListTile(
-              leading: isCompleted
-                  ? const Icon(Icons.check_circle, color: Colors.green)
-                  : isCurrent
-                      ? const Icon(Icons.play_arrow, color: Colors.grey)
-                      : const Icon(Icons.circle_outlined, color: Colors.grey),
-              title: Text(
-                step.heading,
-                style: TextStyle(
-                  fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                  color: isCompleted ? Colors.black54 : Colors.black,
-                ),
-              ),
-              onTap: originalIndex > currentOverallIndex
-                  ? () {
-                      Navigator.of(context).pop();
-                      onJumpToStep(originalIndex); // ORIGINAL index weitergeben
-                    }
-                  : null,
-            );
-          }).toList(),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +26,6 @@ class InstructionScreen extends StatelessWidget {
 
     return Scaffold(
       key: _scaffoldKey,
-      endDrawer: _buildDrawer(context),
       body: Stack(
         children: [
           Padding(
@@ -147,18 +83,6 @@ class InstructionScreen extends StatelessWidget {
 
                         const SizedBox(height: 24),
 
-                        // 🔹 Optionales Bild (jetzt zentriert)
-                        if (pathToImage != null && pathToImage!.isNotEmpty)
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 24),
-                              child: Image.asset(
-                                pathToImage!,
-                                height: 200,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
                       ],
                     ),
                   ),
@@ -187,28 +111,6 @@ class InstructionScreen extends StatelessWidget {
                 const SizedBox(height: 12), // Abstand
 
                 // 5. 'SizedBox' sorgt für die volle Breite
-                if (debugMode) ...[
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: onLeaveStudy,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 40,
-                          vertical: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        "Leave Study",
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ],
               ],
             ),
           ),

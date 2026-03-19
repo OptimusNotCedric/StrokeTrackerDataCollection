@@ -8,8 +8,9 @@ import 'package:path_provider/path_provider.dart';
 
 
 class MeasuringScreen extends StatefulWidget {
-  
-  final VoidCallback onNext;
+  final int repetitions;
+  final int currentRepetition;
+  final VoidCallback onNext;  
   final VoidCallback startMeasuring;
   final VoidCallback stopMeasuring;
 
@@ -18,10 +19,11 @@ class MeasuringScreen extends StatefulWidget {
 
   const MeasuringScreen({
     super.key,
+    required this.repetitions,
     required this.onNext,
     required this.startMeasuring,
     required this.stopMeasuring,
-
+    required this.currentRepetition,
     required this.logger,
     required this.recordingId,
   });
@@ -31,7 +33,6 @@ class MeasuringScreen extends StatefulWidget {
 }
 
 class _MeasuringScreenState extends State<MeasuringScreen> {
-  late int _remaining;
   int _currentCount = 0;
   Timer? _timer;
   CameraController? _cameraController;
@@ -77,10 +78,11 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       debugPrint("Kamera nicht bereit für Aufnahme.");
       return;
     }
-
+    widget.startMeasuring();
+    
     try {
       await _cameraController!.startVideoRecording();
-
+      
       widget.logger.logOtherEvent(
         _currentCount,
         "Record the Smiling of the patient",
@@ -116,13 +118,18 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
       final directory = await getApplicationDocumentsDirectory();
       final String savePath =
-          '${directory.path}/${widget.recordingId}_video.mp4';
+          '${directory.path}/${widget.recordingId}_${widget.currentRepetition}.mp4';
 
       await videoFile.saveTo(savePath);
       debugPrint("Videoaufnahme gestoppt und gespeichert unter: $savePath");
     } catch (e) {
       debugPrint("Fehler beim Stoppen der Videoaufnahme: $e");
     }
+    finishTask();
+  }
+
+  void finishTask(){
+    widget.onNext();
   }
 
   @override
@@ -135,10 +142,9 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String timerText;
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(
+      body: Stack(
             children: [
               // Kamera
               Expanded(
@@ -173,14 +179,19 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(bottom: 50), 
-                child: SizedBox(
-                  width: 150,
+              Positioned(
+                top: null,
+                bottom: null,
+                right: 16,
+                height: MediaQuery.of(context).size.height,
+                child: Center(
+                  
+                  child: SizedBox(
+                  width: 80,
                   height: 60,
-                  child: PlatformElevatedButton(onPressed:recording?() => _stopVideoRecording:() => _startVideoRecording, child: recording? Icon(Icons.pause, size: 36,): Icon(Icons.play_arrow, size: 36,),)
-                ),
-              ),            
+                  child: PlatformElevatedButton(onPressed:recording? _stopVideoRecording: _startVideoRecording, child: recording? Icon(Icons.pause, size: 36,): Icon(Icons.play_arrow, size: 36,),)
+                ),),),
+                        
             ]
       ));
   }

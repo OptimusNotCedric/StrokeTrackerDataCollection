@@ -7,6 +7,7 @@ import 'package:open_wearable/apps/stroke_tracker/model/config.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_protocol.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/instruction_screen.dart';
+import 'package:open_wearable/apps/stroke_tracker/view/repetition_screen.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/smile_check_screen.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/study_selector.dart';
 
@@ -18,7 +19,7 @@ import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 
 class StudyRunner extends StatefulWidget {
   final StudyProtocol protocol;
-
+  final ExperimentLogger logger;
   final Wearable leftWearable;
   final Wearable rightWearable;
   final SensorConfigurationProvider leftConfigProvider;
@@ -27,6 +28,7 @@ class StudyRunner extends StatefulWidget {
   const StudyRunner({
     super.key,
     required this.protocol,
+    required this.logger,
     required this.leftWearable,
     required this.rightWearable,
     required this.leftConfigProvider,
@@ -42,14 +44,9 @@ class _StudyRunnerState extends State<StudyRunner> {
   int _currentIndex = 0;
   
   int _repetitionCounter = 1;
-  String _currentRecordingId = "";
 
   /// Zählt echte Mess-Schritte (1,2,3...)
   int _measuringStepCounter = 0;
-
-  /// Merkt sich, welcher Measuring-Index zuletzt gezählt wurde
-  int _lastCountedMeasuringIndex = -1;
-
 
   late final ExperimentManager _manager;
   late final ExperimentLogger _logger;
@@ -89,9 +86,6 @@ class _StudyRunnerState extends State<StudyRunner> {
 
   Future<void> _startMeasuring() async {
     //await _manager.deactivateSensors(); // <-- wichtig
-
-    _ensureCorrectMeasuringStepCounter();
-
     final step = _steps[_currentIndex];
     final date = DateTime.now().toIso8601String().replaceAll(':', '-');
     final filename = "$_measuringStepCounter.$_repetitionCounter";
@@ -99,7 +93,6 @@ class _StudyRunnerState extends State<StudyRunner> {
     final recordingId =
         "${widget.protocol.sessionId}_step${filename}_${step.heading.replaceAll(" ", "")}_$date";
 
-    _currentRecordingId = recordingId;
 
     await _logger.startLogging(recordingId, false);
     _logger.logTaskStart(_currentIndex, step.heading);
@@ -116,26 +109,33 @@ class _StudyRunnerState extends State<StudyRunner> {
   }
 
   Future<void> _saveAndAdvance() async {
-    // Logging speichern
+    _stopAndConfirm();
     _logger.logTaskEnd();
     await _logger.stopAndWriteLogging(false);
 
     final currentStep = _steps[_currentIndex];
     final maxRepetitions = currentStep.repetitions;
-
+    
+    await Navigator.push(context, 
+    MaterialPageRoute(
+    builder: (context) => TaskScreen(maxRepetition: maxRepetitions, currentRepetition: _repetitionCounter),
+    ),);
     setState(() {
 
       if (_repetitionCounter < maxRepetitions) {
         // weitere Wiederholung des gleichen Schritts
+        print("repeat step");
         _repetitionCounter++;
       } else {
         _repetitionCounter = 1;
+        
         _nextStep();
       }
     });
   }
 
   Future<void> _leaveStudy(bool needToSave) async {
+    print("leave_Study");
     await _manager.deactivateSensors();
 
     if (needToSave) {
@@ -162,6 +162,7 @@ class _StudyRunnerState extends State<StudyRunner> {
   }
 
   void _nextStep() {
+    print("go to next Step");
     if (_currentIndex < _steps.length - 1) {
       setState(() => _currentIndex++);
     } else {
@@ -194,36 +195,8 @@ class _StudyRunnerState extends State<StudyRunner> {
     }
   }
 
-  void _jumpToStep(int index) async {
-    if (index < 0 || index >= _steps.length) return;
 
-    // Sensoren stoppen falls aktiv
-    await _manager.deactivateSensors();
-
-    setState(() {
-      _currentIndex = index;
-      _repetitionCounter = 1;
-
-      /// Critical fix
-      _currentRecordingId = "";
-
-      /// Damit measuringCounter nicht weiterzählt
-      _lastCountedMeasuringIndex = -1;
-      _measuringStepCounter = 0;
-    });
-  }
-
-  void _ensureCorrectMeasuringStepCounter() {
-    final step = _steps[_currentIndex];
-
-    if (step.type == StudyStepType.measuring &&
-        _repetitionCounter == 1 &&
-        _currentIndex != _lastCountedMeasuringIndex) {
-      _measuringStepCounter++;
-      _lastCountedMeasuringIndex = _currentIndex;
-    }
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
@@ -249,37 +222,17 @@ class _StudyRunnerState extends State<StudyRunner> {
 
         final step = _steps[_currentIndex];
 
-        final instructionsStepsEntries = _steps
-            .asMap()
-            .entries
-            .where((e) => e.value.type == StudyStepType.instruction)
-            .toList();
-
-        // extrahiere Listen: gefilterte Steps + ihre Original-Indizes
-        final instructionsSteps =
-            instructionsStepsEntries.map((e) => e.value).toList();
-        final instructionsOriginalIndices =
-            instructionsStepsEntries.map((e) => e.key).toList();
-
         if (step.type == StudyStepType.instruction) {
           return InstructionScreen(
             heading: step.heading,
             description: step.description,
             onNext: _nextStep,
             onLeaveStudy: () => _leaveStudy(false),
-            pathToImage: step.pathToImage.isNotEmpty ? step.pathToImage : null,
-            debugMode: step.debugMode,
-            studySteps: instructionsSteps,
-            studyStepsOriginalIndices: instructionsOriginalIndices, // neu
-            currentOverallIndex: _currentIndex, // eindeutig nennen
-            onJumpToStep: _jumpToStep, // erwartet weiterhin originalen Index
           );
         }
 
-        final date = DateTime.now().toIso8601String().replaceAll(':', '-');
-
         if (step.type == StudyStepType.cameraMeasurement) {
-          return MeasuringScreen(onNext: _nextStep, startMeasuring: _startMeasuring, stopMeasuring: _stopAndConfirm, logger: _logger, recordingId: widget.protocol.sessionId);
+          return MeasuringScreen(currentRepetition: _repetitionCounter, repetitions: step.repetitions, onNext: _saveAndAdvance, startMeasuring: _startMeasuring, stopMeasuring: _stopAndConfirm, logger: _logger, recordingId: widget.protocol.sessionId);
         }
 
         return PlatformScaffold(
