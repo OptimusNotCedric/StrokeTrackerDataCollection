@@ -6,6 +6,7 @@ import 'package:open_earable_flutter/open_earable_flutter.dart';
 import 'package:open_wearable/apps/heart_tracker/widgets/heart_tracker_page.dart';
 import 'package:open_wearable/apps/posture_tracker/model/earable_attitude_tracker.dart';
 import 'package:open_wearable/apps/posture_tracker/view/posture_tracker_view.dart';
+import 'package:open_wearable/apps/stroke_tracker/view/app.dart';
 import 'package:open_wearable/apps/widgets/select_earable_view.dart';
 import 'package:open_wearable/apps/widgets/app_tile.dart';
 
@@ -25,6 +26,7 @@ class AppInfo {
 }
 
 List<AppInfo> _apps = [
+  /*
   AppInfo(
     logoPath: "lib/apps/posture_tracker/assets/logo.png",
     title: "Posture Tracker",
@@ -63,7 +65,14 @@ List<AppInfo> _apps = [
         );
       },
     ),
+  ),*/
+  AppInfo(
+    logoPath: "lib/apps/stroke_tracker/assets/logo.png",
+    title: "Stroke Data Collection",
+    description: "Session-based data collection with global sensor configs",
+    widget: StrokeTrackerView(),
   ),
+
 ];
 
 class AppsPage extends StatelessWidget {

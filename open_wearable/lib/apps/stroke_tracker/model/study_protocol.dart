@@ -19,7 +19,7 @@ class StudyProtocol {
       description: "During the recording smile"
       ),
     StudyStep(
-      type: StudyStepType.measuring,
+      type: StudyStepType.cameraMeasurement,
       repetitions: 5,
     )
     

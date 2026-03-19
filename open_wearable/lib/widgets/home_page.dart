@@ -26,10 +26,12 @@ class _HomePageState extends State<HomePage> {
         icon: Icon(Icons.devices),
         label: titles[0],
       ),
+      /*
       BottomNavigationBarItem(
         icon: Icon(Icons.ssid_chart_rounded),
         label: titles[1],
       ),
+      */
       BottomNavigationBarItem(
         icon: Icon(Icons.apps_rounded),
         label: titles[2],
@@ -47,7 +49,7 @@ class _HomePageState extends State<HomePage> {
     _controller = PlatformTabController(initialIndex: 0);
     _tabs = [
       DevicesPage(),
-      SensorPage(),
+      //SensorPage(),
       const AppsPage(),
     ];
   }

@@ -155,7 +155,7 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
   }
 
   bool _isFilledOut(){
-    return age > 0 && !(genderChoice != null);
+    return age > 0 && (genderChoice != null);
   }
 
 

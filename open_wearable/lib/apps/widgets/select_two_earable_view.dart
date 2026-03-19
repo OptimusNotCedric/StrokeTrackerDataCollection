@@ -90,9 +90,9 @@ class _SelectTwoEarableViewState extends State<SelectTwoEarableView> {
                     ),
                   ),
                 );
-            }, child: const Text('Add Devices'),),
+            }, child: const Text('Scan for Devices'),),
             // Section B — All devices
-            _sectionTitle(context, 'All devices'),
+            _sectionTitle(context, 'Select Devices'),
             const SizedBox(height: 8),
             ...wearables.map((w) => _deviceTile(context, w, prov, wearables)),
             const SizedBox(height: 24),
@@ -116,7 +116,7 @@ class _SelectTwoEarableViewState extends State<SelectTwoEarableView> {
                   : null,
               child: const Text('Continue'),
             ),
-            
+            const SizedBox(height: 30),
           ],
         ),
       ),

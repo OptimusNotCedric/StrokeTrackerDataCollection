@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 
 import 'package:path_provider/path_provider.dart';
@@ -67,8 +68,9 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   }
 
   Future<void> _startVideoRecording() async {
+    print("Hello");
     setState(() {
-      recording =true;
+      recording = true;
     });
 
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
@@ -93,6 +95,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   }
 
   Future<void> _stopVideoRecording() async {
+    print("Stop");
     setState(() {
       recording = false;
     });
@@ -170,6 +173,14 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                   ),
                 ),
               ),
+              Padding(
+                padding: EdgeInsets.only(bottom: 50), 
+                child: SizedBox(
+                  width: 150,
+                  height: 60,
+                  child: PlatformElevatedButton(onPressed:recording?() => _stopVideoRecording:() => _startVideoRecording, child: recording? Icon(Icons.pause, size: 36,): Icon(Icons.play_arrow, size: 36,),)
+                ),
+              ),            
             ]
       ));
   }
