@@ -6,6 +6,7 @@ import 'package:open_wearable/apps/stroke_tracker/controller/manager.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/config.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_protocol.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
+import 'package:open_wearable/apps/stroke_tracker/view/end_page.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/instruction_screen.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/repetition_screen.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/smile_check_screen.dart';
@@ -166,32 +167,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     if (_currentIndex < _steps.length - 1) {
       setState(() => _currentIndex++);
     } else {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text("Study completed"),
-          content: const Text("Thank you!"),
-          actions: [
-            TextButton(
-              child: const Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pushAndRemoveUntil(
-                  platformPageRoute(
-                    context: context,
-                    builder: (_) => StudySelection(
-                      leftWearable: widget.leftWearable,
-                      rightWearable: widget.rightWearable,
-                      leftConfigProvider: widget.leftConfigProvider,
-                      rightConfigProvider: widget.rightConfigProvider,
-                    ),
-                  ),
-                  (route) => route.isFirst,
-                );
-              },
-            )
-          ],
-        ),
-      );
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => SummaryScreen()));
     }
   }
 
