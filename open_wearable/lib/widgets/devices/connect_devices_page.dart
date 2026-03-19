@@ -46,16 +46,20 @@ class _ConnectDevicesPageState extends State<ConnectDevicesPage> {
         trailing: Icon(PlatformIcons(context).checkMark),
       );
     }).toList();
+
+    discoveredDevices.removeWhere((device) {return !device.name.contains("OpenEarable");});
+
     List<Widget> discoveredDevicesWidgets = discoveredDevices.map((device) {
-      return PlatformListTile(
-        title: PlatformText(device.name),
-        subtitle: PlatformText(device.id),
-        trailing: _buildTrailingWidget(device.id),
-        onTap: () {
-          _connectToDevice(device, context);
-        },
+        return PlatformListTile(
+          title: PlatformText(device.name),
+          subtitle: PlatformText(device.id),
+          trailing: _buildTrailingWidget(device.id),
+          onTap: () {
+            _connectToDevice(device, context);
+          },
       );
     }).toList();
+    
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
@@ -103,6 +107,7 @@ class _ConnectDevicesPageState extends State<ConnectDevicesPage> {
     return const SizedBox.shrink();
   }
 
+  // needs OpenEarable in name to be connected
   void _startScanning() async {
     _wearableManager.startScan();
     _scanSubscription?.cancel();
