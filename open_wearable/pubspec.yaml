@@ -35,6 +35,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   open_file: ^3.3.2
+  camera: ^0.10.5+9
   open_earable_flutter: ^2.3.1
   flutter_platform_widgets: ^9.0.0
   provider: ^6.1.2
@@ -55,7 +56,7 @@ dependencies:
   url_launcher: ^6.3.2
   go_router: ^14.6.2
   http: ^1.6.0
-
+  csv: ^5.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -82,7 +83,7 @@ flutter:
   assets:
     - lib/apps/posture_tracker/assets/
     - lib/apps/heart_tracker/assets/
-
+    - lib/apps/stroke_tracker/assets/
   # An image asset can refer to one or more resolution-specific "variants", seeq
   # https://flutter.dev/to/resolution-aware-images
 
