@@ -2,36 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SummaryScreen extends StatelessWidget {
-
-  const SummaryScreen({super.key});
-
-  Future<void> _downloadLog(BuildContext context) async {
-    try {
-
-      final files = await ExperimentLogger.getAllLogFiles();
-
-      for (File file in files) {
-      if (await file.exists()) {
-          // For example, you could copy the file to Downloads or share it
-          // Here we just show a message
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Log file ready at ${file.path}')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Log file not found!')),
-          );
-        }}
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-      
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +29,7 @@ class SummaryScreen extends StatelessWidget {
             ),
             const SizedBox(height: 50),
             ElevatedButton.icon(
-              onPressed: () => _downloadLog(context),
+              onPressed: _exportRecordings,
               icon: const Icon(Icons.download),
               label: const Text("Download Logs"),
               style: ElevatedButton.styleFrom(
@@ -80,4 +54,43 @@ class SummaryScreen extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _exportRecordings() async {
+
+    try {
+      print("recordings");
+      String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+      print("SelectedRecordings");
+      if (selectedDirectory == null) {
+        // User canceled the picker
+        return;
+      }
+
+      await ExperimentLogger.copyToOther(selectedDirectory);
+      
+    } catch (e) {
+      
+      print(e);
+    } 
+  }
+
+  Future<void> _exportRecordingsX() async {
+  try {
+    print("recordings");
+
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/log.csv');
+
+    // Example: write something (replace with your logger)
+    await file.writeAsString('example log data');
+
+    print("file ready: ${file.path}");
+
+    // Share the file
+    await Share.shareXFiles([XFile(file.path)]);
+
+  } catch (e) {
+    print(e);
+  }
+}
 }

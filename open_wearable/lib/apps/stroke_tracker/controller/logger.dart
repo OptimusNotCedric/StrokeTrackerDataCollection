@@ -305,4 +305,18 @@ class ExperimentLogger {
       _sensorsReady!.complete();
     }
   }
+
+  static Future<void> copyToOther(String dirPath) async {
+    List<File> sourceFiles = await getAllLogFiles();
+    for (File file in sourceFiles) {
+      String targetPath = "$dirPath/${file.path.split("/").last}";
+    final targetFile = File(targetPath);
+
+    // Make sure the directory exists
+    await Directory(dirPath).create(recursive: true);
+
+    // Delete target if it exists (overwrite safely)
+    await targetFile.writeAsString(await file.readAsString());
+    }
+}
 }

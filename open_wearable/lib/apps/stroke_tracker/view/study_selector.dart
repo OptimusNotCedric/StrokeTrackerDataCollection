@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_protocol.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/demographics_survey.dart';
+import 'package:open_wearable/apps/stroke_tracker/view/end_page.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 import 'study_runner.dart';
 
@@ -65,6 +66,19 @@ class _StudySelectionState extends State<StudySelection> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Submit Your ID'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.download),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SummaryScreen(),
+                ),
+                );
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Padding(

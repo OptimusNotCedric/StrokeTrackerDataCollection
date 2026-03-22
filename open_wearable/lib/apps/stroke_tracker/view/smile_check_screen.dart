@@ -33,7 +33,6 @@ class MeasuringScreen extends StatefulWidget {
 }
 
 class _MeasuringScreenState extends State<MeasuringScreen> {
-  int _currentCount = 0;
   Timer? _timer;
   CameraController? _cameraController;
   Future<void>? _initializeControllerFuture;
@@ -43,7 +42,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   @override
   void initState() {
     super.initState();
-    _currentCount = 0;
+   
     _initCamera();
   }
 
@@ -84,7 +83,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       await _cameraController!.startVideoRecording();
       
       widget.logger.logOtherEvent(
-        _currentCount,
+        widget.repetitions,
         "Record the Smiling of the patient",
         "Smiling Task",
         "Video_Record_Start",
@@ -110,7 +109,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       final XFile videoFile = await _cameraController!.stopVideoRecording();
 
       widget.logger.logOtherEvent(
-        _currentCount,
+        widget.repetitions,
         "Smiling task",
         "Smiling task",
         "Video_Record_Stop",

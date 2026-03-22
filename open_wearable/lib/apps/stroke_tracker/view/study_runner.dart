@@ -47,7 +47,6 @@ class _StudyRunnerState extends State<StudyRunner> {
   int _repetitionCounter = 1;
 
   /// Zählt echte Mess-Schritte (1,2,3...)
-  int _measuringStepCounter = 0;
 
   late final ExperimentManager _manager;
   late final ExperimentLogger _logger;
@@ -89,7 +88,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     //await _manager.deactivateSensors(); // <-- wichtig
     final step = _steps[_currentIndex];
     final date = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final filename = "$_measuringStepCounter.$_repetitionCounter";
+    final filename = "$_repetitionCounter";
 
     final recordingId =
         "${widget.protocol.sessionId}_step${filename}_${step.heading.replaceAll(" ", "")}_$date";
@@ -114,12 +113,18 @@ class _StudyRunnerState extends State<StudyRunner> {
     _logger.logTaskEnd();
     await _logger.stopAndWriteLogging(false);
 
+    print("-----------------------------------------------------------$_currentIndex---------------------------------------------");
     final currentStep = _steps[_currentIndex];
     final maxRepetitions = currentStep.repetitions;
     
     await Navigator.push(context, 
     MaterialPageRoute(
-    builder: (context) => TaskScreen(maxRepetition: maxRepetitions, currentRepetition: _repetitionCounter),
+    builder: (context) => TaskScreen(
+      maxRepetition: maxRepetitions, 
+      currentRepetition: _repetitionCounter, 
+      logger: _logger, 
+      currentStepNumber: _currentIndex,
+      currentStepTask: _steps[_currentIndex].heading,),
     ),);
     setState(() {
 
@@ -208,7 +213,7 @@ class _StudyRunnerState extends State<StudyRunner> {
         }
 
         if (step.type == StudyStepType.cameraMeasurement) {
-          return MeasuringScreen(currentRepetition: _repetitionCounter, repetitions: step.repetitions, onNext: _saveAndAdvance, startMeasuring: _startMeasuring, stopMeasuring: _stopAndConfirm, logger: _logger, recordingId: widget.protocol.sessionId);
+          return MeasuringScreen(currentRepetition: _repetitionCounter, repetitions: _repetitionCounter, onNext: _saveAndAdvance, startMeasuring: _startMeasuring, stopMeasuring: _stopAndConfirm, logger: _logger, recordingId: widget.protocol.sessionId);
         }
 
         return PlatformScaffold(
