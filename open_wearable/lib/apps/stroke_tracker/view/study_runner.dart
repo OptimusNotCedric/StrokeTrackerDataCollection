@@ -13,6 +13,7 @@ import 'package:open_wearable/apps/stroke_tracker/view/smile_check_screen.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/study_selector.dart';
 
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
+import 'package:provider/provider.dart';
 
 
 
@@ -57,9 +58,10 @@ class _StudyRunnerState extends State<StudyRunner> {
   @override
   void initState() {
     super.initState();
+    _logger = widget.logger;
     _steps = widget.protocol.getSteps();
-    _logger = ExperimentLogger();
     _loadingFuture = _loadConfigAndInitManager();
+    
   }
 
   Future<void> _loadConfigAndInitManager() async {
@@ -94,7 +96,6 @@ class _StudyRunnerState extends State<StudyRunner> {
         "${widget.protocol.sessionId}_step${filename}_${step.heading.replaceAll(" ", "")}_$date";
 
 
-    await _logger.startLogging(recordingId, false);
     _logger.logTaskStart(_currentIndex, step.heading);
 
     await _manager.setSensorLogFilePrefix(recordingId);
@@ -111,9 +112,6 @@ class _StudyRunnerState extends State<StudyRunner> {
   Future<void> _saveAndAdvance() async {
     _stopAndConfirm();
     _logger.logTaskEnd();
-    await _logger.stopAndWriteLogging(false);
-
-    print("-----------------------------------------------------------$_currentIndex---------------------------------------------");
     final currentStep = _steps[_currentIndex];
     final maxRepetitions = currentStep.repetitions;
     
@@ -126,6 +124,9 @@ class _StudyRunnerState extends State<StudyRunner> {
       currentStepNumber: _currentIndex,
       currentStepTask: _steps[_currentIndex].heading,),
     ),);
+    if (_repetitionCounter >= maxRepetitions) {
+      _logger.stopAndWriteLogging(false);
+    }
     setState(() {
 
       if (_repetitionCounter < maxRepetitions) {
@@ -138,6 +139,7 @@ class _StudyRunnerState extends State<StudyRunner> {
         _nextStep();
       }
     });
+
   }
 
   Future<void> _leaveStudy(bool needToSave) async {
@@ -213,6 +215,7 @@ class _StudyRunnerState extends State<StudyRunner> {
         }
 
         if (step.type == StudyStepType.cameraMeasurement) {
+          _logger.startLogging("User${widget.protocol.participantId}_Ses${widget.protocol.sessionId}_Smile",false);
           return MeasuringScreen(currentRepetition: _repetitionCounter, repetitions: _repetitionCounter, onNext: _saveAndAdvance, startMeasuring: _startMeasuring, stopMeasuring: _stopAndConfirm, logger: _logger, recordingId: widget.protocol.sessionId);
         }
 

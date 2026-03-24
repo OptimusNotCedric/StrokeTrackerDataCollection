@@ -1,10 +1,12 @@
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
+import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_protocol.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/demographics_survey.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/end_page.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
+import 'package:provider/provider.dart';
 import 'study_runner.dart';
 
 import 'package:share_plus/share_plus.dart';
@@ -51,12 +53,13 @@ class _StudySelectionState extends State<StudySelection> {
      Navigator.push(
       context, platformPageRoute(
         context: context,
-        builder: (_) => DemographicsSurvey(
+        builder: (_) => ChangeNotifierProvider(
+        create: (_) => ExperimentLogger(), child :DemographicsSurvey(
           protocol: protocol, 
           leftWearable: widget.leftWearable, 
           rightWearable: widget.rightWearable, 
           leftConfigProvider: widget.leftConfigProvider, 
-          rightConfigProvider: widget.rightConfigProvider,),)
+          rightConfigProvider: widget.rightConfigProvider,),),)
     );
   }
 

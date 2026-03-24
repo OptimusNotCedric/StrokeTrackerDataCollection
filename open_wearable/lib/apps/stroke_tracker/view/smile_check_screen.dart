@@ -84,7 +84,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       
       widget.logger.logOtherEvent(
         widget.repetitions,
-        "Record the Smiling of the patient",
+        "Start Record of smilingpatient",
         "Smiling Task",
         "Video_Record_Start",
       );
@@ -110,7 +110,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
       widget.logger.logOtherEvent(
         widget.repetitions,
-        "Smiling task",
+        "Stop Record of smiling patient",
         "Smiling task",
         "Video_Record_Stop",
       );

@@ -4,6 +4,7 @@ import 'package:open_earable_flutter/open_earable_flutter.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_protocol.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
+import 'package:provider/provider.dart';
 import 'study_runner.dart';
 
 typedef SurveyResults = Map<String, dynamic>;
@@ -40,21 +41,22 @@ class DemographicsSurvey extends StatefulWidget {
 }
 
 class _DemographicsSurveyState extends State<DemographicsSurvey> {
-  late final ExperimentLogger _logger;
   TextEditingController ageInputController = TextEditingController();
   TextEditingController predispotionsController = TextEditingController();
-
+  late final ExperimentLogger _logger;
   int age = -1;
   Gender? genderChoice;
   
   @override
   void initState() {
     super.initState();
-    _logger = ExperimentLogger();
+    _logger = Provider.of<ExperimentLogger>(context, listen: false);
   }
 
   @override
   Widget build(BuildContext context){
+    
+
     return PlatformScaffold(
       appBar: PlatformAppBar(title: PlatformText("Fill out the Survey"),),
       body: SingleChildScrollView(
@@ -185,7 +187,7 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
       );
     }
 
-    await _logger.stopAndWriteLogging(false);
+    await _logger.logSurveyResults();
 
     if (context.mounted) {
       Navigator.pushReplacement(

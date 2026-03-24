@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
+import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/study_runner.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/study_selector.dart';
 import 'package:open_wearable/apps/widgets/select_two_earable_view.dart';

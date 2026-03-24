@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:csv/csv.dart';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Represents a single step event
@@ -83,11 +84,11 @@ class SyncEvent {
 }
 
 /// Logger for ExperimentManager
-class ExperimentLogger {
+class ExperimentLogger extends ChangeNotifier{
   static const String _stepsCsvHeader =
       'Block,Task,DurationS,StartTime,EndTime,RelativeStartMS,RelativeEndMS';
   static const String _otherCsvHeader =
-      'Block,Task,Time,RelativeTimeMS,EventType';
+      'Block,Task,Time,RelativeTimeMS,EventType,Value';
   static const String _syncCsvHeader =
       "DeviceTimestamp,PhoneTimestamp,RelativePhoneTimeMS";
 
@@ -215,6 +216,27 @@ class ExperimentLogger {
     if (_stepEvents.isNotEmpty) _stepEvents.removeLast();
   }
 
+  Future<void> logSurveyResults() async{
+    final converter = ListToCsvConverter();
+
+    final otherRows = <List<String>>[];
+    otherRows.add(_otherCsvHeader.split(','));
+    for (final e in _otherEvents) {
+      otherRows.add(e.toCsvRow());
+    }
+
+    final otherCsvData = converter.convert(otherRows);
+    _stepEvents.clear();
+    _otherEvents.clear();
+    _syncLeftEvents.clear();
+    _syncRightEvents.clear();
+
+    _sensorsReady = null;
+      await Future.wait([
+        _otherCsvFile.writeAsString(otherCsvData, mode: FileMode.write),
+      ]);
+  }
+
   Future<void> stopAndWriteLogging(bool sync) async {
     print("Finalizing experiment");
 
@@ -295,7 +317,7 @@ class ExperimentLogger {
     if (await file.exists()) {
       await file.delete();
     }
-  }
+ }
 
   void _checkReady() {
     if (_syncLeftEvents.isNotEmpty &&
@@ -303,6 +325,13 @@ class ExperimentLogger {
         _sensorsReady != null &&
         !_sensorsReady!.isCompleted) {
       _sensorsReady!.complete();
+    }
+  }
+
+  static Future<void> deleteAllLogFiles() async {
+    List<File> allLogFiles = await getAllLogFiles();
+    for (File file in allLogFiles) {
+      deleteLogFile(file);
     }
   }
 

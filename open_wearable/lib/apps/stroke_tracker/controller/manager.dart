@@ -203,6 +203,7 @@ class ExperimentManager {
       if (rightWearable is SensorManager) {
         List<Sensor> sensors = (rightWearable as SensorManager).sensors;
         for (var sensor in sensors) {
+          print("Sensorname: ${sensor.sensorName}");
           if (sensor.sensorName == "OPTICAL_TEMPERATURE_SENSOR") {
             _rightSubscription = sensor.sensorStream.listen(
               (SensorValue value) => logger.logSyncRightEvent(value.timestamp),

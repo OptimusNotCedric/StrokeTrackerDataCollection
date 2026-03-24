@@ -137,7 +137,7 @@ class _TaskScreenState extends State<TaskScreen> {
   }
 
   void pressExitButton(){
-    widget.logger.logOtherEvent(widget.currentStepNumber, widget.currentStepTask, widget.currentStepNumber.toString(), score.toString());
+    widget.logger.logOtherEvent(widget.currentRepetition, "Evaluation", widget.currentStepTask, score.toString());
     Navigator.of(context).pop();
   }
 

@@ -29,7 +29,7 @@ class SummaryScreen extends StatelessWidget {
             ),
             const SizedBox(height: 50),
             ElevatedButton.icon(
-              onPressed: _exportRecordings,
+              onPressed: _exportRecordingsX,
               icon: const Icon(Icons.download),
               label: const Text("Download Logs"),
               style: ElevatedButton.styleFrom(
@@ -37,11 +37,10 @@ class SummaryScreen extends StatelessWidget {
                 textStyle: const TextStyle(fontSize: 20),
               ),
             ),
+            if (true)
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
+              onPressed: _deleteLogs,
               child: const Text("Exit"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey,
@@ -75,22 +74,27 @@ class SummaryScreen extends StatelessWidget {
   }
 
   Future<void> _exportRecordingsX() async {
-  try {
-    print("recordings");
-
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/log.csv');
-
-    // Example: write something (replace with your logger)
-    await file.writeAsString('example log data');
-
-    print("file ready: ${file.path}");
-
-    // Share the file
-    await Share.shareXFiles([XFile(file.path)]);
-
-  } catch (e) {
-    print(e);
+    try {
+        print("recordings");
+        List<File> files = await ExperimentLogger.getAllLogFiles();
+        List<XFile> xFiles = [];
+        // Share the file
+        for (File file in files) {
+          xFiles.add(XFile(file.path));
+          print(file.path);
+        }
+        final params = ShareParams(files: xFiles, text: "Recordings");
+        final result = await SharePlus.instance.share(params);
+        if (result.status == ShareResultStatus.success) {
+          print("Successfully exported");
+        }
+    } catch (e) {
+        print(e);
+    }
   }
-}
+
+  Future<void> _deleteLogs() async {
+    await ExperimentLogger.deleteAllLogFiles();
+  }
+  
 }
