@@ -95,9 +95,9 @@ class _StudyRunnerState extends State<StudyRunner> {
     final recordingId =
         "${widget.protocol.sessionId}_step${filename}_${step.heading.replaceAll(" ", "")}_$date";
 
-
+    _logger.startLogging(false, widget.protocol.sessionId);
     _logger.logTaskStart(_currentIndex, step.heading);
-
+    
     await _manager.setSensorLogFilePrefix(recordingId);
     await _manager.configureSensors();
     await _logger.sensorsReady;
@@ -112,6 +112,7 @@ class _StudyRunnerState extends State<StudyRunner> {
   Future<void> _saveAndAdvance() async {
     _stopAndConfirm();
     _logger.logTaskEnd();
+    _logger.stopAndWriteLogging(false);
     final currentStep = _steps[_currentIndex];
     final maxRepetitions = currentStep.repetitions;
     
@@ -124,9 +125,6 @@ class _StudyRunnerState extends State<StudyRunner> {
       currentStepNumber: _currentIndex,
       currentStepTask: _steps[_currentIndex].heading,),
     ),);
-    if (_repetitionCounter >= maxRepetitions) {
-      _logger.stopAndWriteLogging(false);
-    }
     setState(() {
 
       if (_repetitionCounter < maxRepetitions) {
@@ -174,7 +172,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     if (_currentIndex < _steps.length - 1) {
       setState(() => _currentIndex++);
     } else {
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => SummaryScreen()));
+      _leaveStudy(true);
     }
   }
 
@@ -215,7 +213,7 @@ class _StudyRunnerState extends State<StudyRunner> {
         }
 
         if (step.type == StudyStepType.cameraMeasurement) {
-          _logger.startLogging("User${widget.protocol.participantId}_Ses${widget.protocol.sessionId}_Smile",false);
+          
           return MeasuringScreen(currentRepetition: _repetitionCounter, repetitions: _repetitionCounter, onNext: _saveAndAdvance, startMeasuring: _startMeasuring, stopMeasuring: _stopAndConfirm, logger: _logger, recordingId: widget.protocol.sessionId);
         }
 

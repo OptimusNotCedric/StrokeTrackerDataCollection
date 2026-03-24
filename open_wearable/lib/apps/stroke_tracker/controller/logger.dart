@@ -23,8 +23,9 @@ class StepEvent {
     this.relativeEndTime,
   });
 
-  List<String> toCsvRow() {
+  List<String> toCsvRow(String sessionID) {
     return [
+      sessionID,
       blockNumber.toString(),
       taskId,
       startTime.toIso8601String(),
@@ -52,8 +53,9 @@ class OtherEvent {
     required this.eventType,
   });
 
-  List<String> toCsvRow() {
+  List<String> toCsvRow(String SessionID) {
     return [
+      SessionID,
       blockNumber.toString(),
       instruction,
       taskId,
@@ -74,8 +76,9 @@ class SyncEvent {
     required this.relativePhoneTime,
   });
 
-  List<String> toCsvRow() {
+  List<String> toCsvRow(String sessionID) {
     return [
+      sessionID,
       deviceTimestamp.toString(),
       phoneTimestamp.toIso8601String(),
       relativePhoneTime.toString(),
@@ -86,17 +89,18 @@ class SyncEvent {
 /// Logger for ExperimentManager
 class ExperimentLogger extends ChangeNotifier{
   static const String _stepsCsvHeader =
-      'Block,Task,DurationS,StartTime,EndTime,RelativeStartMS,RelativeEndMS';
+      'SessionID,Block,Task,DurationS,StartTime,EndTime,RelativeStartMS,RelativeEndMS';
   static const String _otherCsvHeader =
-      'Block,Task,Time,RelativeTimeMS,EventType,Value';
+      'SessionID,Block,Task,Time,RelativeTimeMS,EventType,Value';
   static const String _syncCsvHeader =
-      "DeviceTimestamp,PhoneTimestamp,RelativePhoneTimeMS";
+      "SessionID,DeviceTimestamp,PhoneTimestamp,RelativePhoneTimeMS";
 
   late File _stepsCsvFile;
   late File _otherCsvFile;
   late File _syncLeftCsvFile;
   late File _syncRightCsvFile;
 
+  late String sessionID;
   late DateTime _sessionStartTime;
   final List<StepEvent> _stepEvents = [];
   final List<OtherEvent> _otherEvents = [];
@@ -119,22 +123,33 @@ class ExperimentLogger extends ChangeNotifier{
     return _sensorsReady!.future;
   }
 
-  Future<void> startLogging(String prefix, bool sync) async {
-    print("prefix = $prefix");
+  Future<void> startLogging(bool sync, String newSessionID) async {
+    sessionID = newSessionID;
     final dir = await getApplicationDocumentsDirectory();
 
     if (!sync) {
-      _stepsCsvFile = File('${dir.path}/${prefix}steps_log.csv');
-      _otherCsvFile = File('${dir.path}/${prefix}other_log.csv');
+      _stepsCsvFile = File('${dir.path}/steps_log.csv');
+      _otherCsvFile = File('${dir.path}/other_log.csv');
     }
 
-    _syncLeftCsvFile = File('${dir.path}/${prefix}sync_left_log.csv');
-    _syncRightCsvFile = File('${dir.path}/${prefix}sync_right_log.csv');
+    _syncLeftCsvFile = File('${dir.path}/sync_left_log.csv');
+    _syncRightCsvFile = File('${dir.path}/sync_right_log.csv');
 
-    _stepEvents.clear();
-    _otherEvents.clear();
-    _syncLeftEvents.clear();
-    _syncRightEvents.clear();
+    if (!await _stepsCsvFile.exists()){
+      _stepsCsvFile.writeAsString(_stepsCsvHeader);
+    }
+
+    if (!await _otherCsvFile.exists()){
+      _otherCsvFile.writeAsString(_otherCsvHeader);
+    }
+
+    if (!await _syncLeftCsvFile.exists()){
+      _syncLeftCsvFile.writeAsString(_syncCsvHeader);
+    }
+
+    if (!await _syncRightCsvFile.exists()){
+      _syncRightCsvFile.writeAsString(_syncCsvHeader);
+    }
 
     _sensorsReady = null;
     _sessionStartTime = DateTime.now();
@@ -156,7 +171,7 @@ class ExperimentLogger extends ChangeNotifier{
       relativeTime: relative,
       eventType: eventType,
     );
-    print(event.toCsvRow());
+    print(event.toCsvRow(sessionID));
     _otherEvents.add(event);
   }
 
@@ -168,7 +183,7 @@ class ExperimentLogger extends ChangeNotifier{
       phoneTimestamp: now,
       relativePhoneTime: relative,
     );
-    print(event.toCsvRow());
+    print(event.toCsvRow(sessionID));
     _syncLeftEvents.add(event);
     _checkReady();
   }
@@ -181,7 +196,7 @@ class ExperimentLogger extends ChangeNotifier{
       phoneTimestamp: now,
       relativePhoneTime: relative,
     );
-    print(event.toCsvRow());
+    print(event.toCsvRow(sessionID));
     _syncRightEvents.add(event);
     _checkReady();
   }
@@ -198,7 +213,7 @@ class ExperimentLogger extends ChangeNotifier{
       startTime: now,
       relativeStartTime: relative,
     );
-    print(event.toCsvRow());
+    print(event.toCsvRow(sessionID));
     _stepEvents.add(event);
   }
 
@@ -209,32 +224,11 @@ class ExperimentLogger extends ChangeNotifier{
     final event = _stepEvents.last;
     event.endTime = now;
     event.relativeEndTime = relative;
-    print(event.toCsvRow());
+    print(event.toCsvRow(sessionID));
   }
 
   void discardLastTask() {
     if (_stepEvents.isNotEmpty) _stepEvents.removeLast();
-  }
-
-  Future<void> logSurveyResults() async{
-    final converter = ListToCsvConverter();
-
-    final otherRows = <List<String>>[];
-    otherRows.add(_otherCsvHeader.split(','));
-    for (final e in _otherEvents) {
-      otherRows.add(e.toCsvRow());
-    }
-
-    final otherCsvData = converter.convert(otherRows);
-    _stepEvents.clear();
-    _otherEvents.clear();
-    _syncLeftEvents.clear();
-    _syncRightEvents.clear();
-
-    _sensorsReady = null;
-      await Future.wait([
-        _otherCsvFile.writeAsString(otherCsvData, mode: FileMode.write),
-      ]);
   }
 
   Future<void> stopAndWriteLogging(bool sync) async {
@@ -243,44 +237,41 @@ class ExperimentLogger extends ChangeNotifier{
     final converter = ListToCsvConverter();
 
     final syncLeftRows = <List<String>>[];
-    syncLeftRows.add(_syncCsvHeader.split(','));
+    
     for (final e in _syncLeftEvents) {
-      syncLeftRows.add(e.toCsvRow());
+      syncLeftRows.add(e.toCsvRow(sessionID));
     }
 
     final syncRightRows = <List<String>>[];
-    syncRightRows.add(_syncCsvHeader.split(','));
+    
     for (final e in _syncRightEvents) {
-      syncRightRows.add(e.toCsvRow());
+      syncRightRows.add(e.toCsvRow(sessionID));
     }
 
     final syncLeftCsvData = converter.convert(syncLeftRows);
     final syncRightCsvData = converter.convert(syncRightRows);
 
     await Future.wait([
-      _syncLeftCsvFile.writeAsString(syncLeftCsvData, mode: FileMode.write),
-      _syncRightCsvFile.writeAsString(syncRightCsvData, mode: FileMode.write),
+      _syncLeftCsvFile.writeAsString("\n$syncLeftCsvData", mode: FileMode.append),
+      _syncRightCsvFile.writeAsString("\n$syncRightCsvData", mode: FileMode.append),
     ]);
 
     if (!sync) {
       final stepsRows = <List<String>>[];
-      stepsRows.add(_stepsCsvHeader.split(','));
       for (final e in _stepEvents) {
-        stepsRows.add(e.toCsvRow());
+        stepsRows.add(e.toCsvRow(sessionID));
       }
-
       final otherRows = <List<String>>[];
-      otherRows.add(_otherCsvHeader.split(','));
       for (final e in _otherEvents) {
-        otherRows.add(e.toCsvRow());
+        otherRows.add(e.toCsvRow(sessionID));
       }
 
       final stepsCsvData = converter.convert(stepsRows);
       final otherCsvData = converter.convert(otherRows);
 
       await Future.wait([
-        _stepsCsvFile.writeAsString(stepsCsvData, mode: FileMode.write),
-        _otherCsvFile.writeAsString(otherCsvData, mode: FileMode.write),
+        _stepsCsvFile.writeAsString("\n$stepsCsvData", mode: FileMode.append),
+        _otherCsvFile.writeAsString("\n$otherCsvData", mode: FileMode.append),
       ]);
     }
 

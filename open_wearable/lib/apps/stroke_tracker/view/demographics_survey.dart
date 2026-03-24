@@ -175,8 +175,8 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
     results["gender"] = genderChoice.toString().split(".")[1];
     results["predispositions"] = predispotionsController.text;
 
-    final prefix = "${widget.protocol.sessionId}_survey_${DateTime.now()}_";
-    await _logger.startLogging(prefix, false);
+    final prefix = "${widget.protocol.participantId}_${widget.protocol.sessionId}_";
+    await _logger.startLogging(false, widget.protocol.sessionId);
 
     for (var entry in results.entries) {
       _logger.logOtherEvent(
@@ -187,7 +187,7 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
       );
     }
 
-    await _logger.logSurveyResults();
+    await _logger.stopAndWriteLogging(false);
 
     if (context.mounted) {
       Navigator.pushReplacement(
