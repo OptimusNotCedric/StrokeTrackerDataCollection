@@ -319,11 +319,37 @@ class ExperimentLogger extends ChangeNotifier{
     }
   }
 
-  static Future<void> deleteAllLogFiles() async {
-    List<File> allLogFiles = await getAllLogFiles();
-    for (File file in allLogFiles) {
-      deleteLogFile(file);
+  Future<void> clearAppDocumentsDirectory() async {
+  final dir = await getApplicationDocumentsDirectory();
+
+  if (await dir.exists()) {
+    final files = dir.listSync();
+
+    for (final file in files) {
+      try {
+        if (file is File) {
+          await file.delete();
+        } else if (file is Directory) {
+          await file.delete(recursive: true);
+        }
+      } catch (e) {
+        print("Error deleting $file: $e");
+      }
     }
+  }
+
+  print("ApplicationDocumentsDirectory cleared");
+}
+
+
+  static Future<void> deleteAllLogFiles() async {
+    final dir = await getApplicationDocumentsDirectory();
+
+    if (await dir.exists()) {
+      await dir.delete(recursive: true);
+    }
+
+    await dir.create();
   }
 
   static Future<void> copyToOther(String dirPath) async {
