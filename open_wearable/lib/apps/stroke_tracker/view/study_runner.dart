@@ -1,3 +1,4 @@
+import 'package:face_detection_tflite/face_detection_tflite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
@@ -13,7 +14,6 @@ import 'package:open_wearable/apps/stroke_tracker/view/smile_check_screen.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/study_selector.dart';
 
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
-import 'package:provider/provider.dart';
 
 
 
@@ -46,7 +46,7 @@ class _StudyRunnerState extends State<StudyRunner> {
   int _currentIndex = 0;
   
   int _repetitionCounter = 1;
-
+  late final FaceDetectorIsolate _faceDetectorIsolate;
   /// Zählt echte Mess-Schritte (1,2,3...)
 
   late final ExperimentManager _manager;
@@ -58,11 +58,25 @@ class _StudyRunnerState extends State<StudyRunner> {
   @override
   void initState() {
     super.initState();
-    _logger = widget.logger;
+    _loadConfigureFaceDetector();
     _steps = widget.protocol.getSteps();
+    _logger = ExperimentLogger();
     _loadingFuture = _loadConfigAndInitManager();
-    
   }
+
+  //takes 100-500ms
+  Future<void> _loadConfigureFaceDetector() async {
+    try {
+      _faceDetectorIsolate = await FaceDetectorIsolate.spawn(
+        model: FaceDetectionModel.backCamera,
+        performanceConfig: PerformanceConfig.auto(),
+        meshPoolSize: 1,
+      );
+      
+    } catch (_) {}
+    setState(() {});
+  }
+  
 
   Future<void> _loadConfigAndInitManager() async {
     final sensorConfigs = [
@@ -95,9 +109,10 @@ class _StudyRunnerState extends State<StudyRunner> {
     final recordingId =
         "${widget.protocol.sessionId}_step${filename}_${step.heading.replaceAll(" ", "")}_$date";
 
-    _logger.startLogging(false, widget.protocol.sessionId);
+
+    await _logger.startLogging(false, widget.protocol.sessionId);
     _logger.logTaskStart(_currentIndex, step.heading);
-    
+
     await _manager.setSensorLogFilePrefix(recordingId);
     await _manager.configureSensors();
     await _logger.sensorsReady;
@@ -112,7 +127,7 @@ class _StudyRunnerState extends State<StudyRunner> {
   Future<void> _saveAndAdvance() async {
     _stopAndConfirm();
     _logger.logTaskEnd();
-    _logger.stopAndWriteLogging(false);
+    await _logger.stopAndWriteLogging(false);
     final currentStep = _steps[_currentIndex];
     final maxRepetitions = currentStep.repetitions;
     
@@ -137,7 +152,6 @@ class _StudyRunnerState extends State<StudyRunner> {
         _nextStep();
       }
     });
-
   }
 
   Future<void> _leaveStudy(bool needToSave) async {
@@ -172,7 +186,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     if (_currentIndex < _steps.length - 1) {
       setState(() => _currentIndex++);
     } else {
-      _leaveStudy(true);
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => SummaryScreen()));
     }
   }
 
@@ -213,8 +227,15 @@ class _StudyRunnerState extends State<StudyRunner> {
         }
 
         if (step.type == StudyStepType.cameraMeasurement) {
-          
-          return MeasuringScreen(currentRepetition: _repetitionCounter, repetitions: _repetitionCounter, onNext: _saveAndAdvance, startMeasuring: _startMeasuring, stopMeasuring: _stopAndConfirm, logger: _logger, recordingId: widget.protocol.sessionId);
+          return MeasuringScreen(
+            currentRepetition: _repetitionCounter, 
+            repetitions: _repetitionCounter, 
+            onNext: _saveAndAdvance, 
+            startMeasuring: _startMeasuring, 
+            stopMeasuring: _stopAndConfirm, 
+            logger: _logger,
+            faceDetector: _faceDetectorIsolate,
+            recordingId: widget.protocol.sessionId);
         }
 
         return PlatformScaffold(
@@ -228,5 +249,11 @@ class _StudyRunnerState extends State<StudyRunner> {
           );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _faceDetectorIsolate.dispose();
+    super.dispose();
   }
 }

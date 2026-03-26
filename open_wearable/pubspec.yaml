@@ -57,6 +57,8 @@ dependencies:
   go_router: ^14.6.2
   http: ^1.6.0
   csv: ^5.0.2
+  face_detection_tflite: ^5.0.9
+  opencv_dart: ^2.2.1+4
 dev_dependencies:
   flutter_test:
     sdk: flutter
