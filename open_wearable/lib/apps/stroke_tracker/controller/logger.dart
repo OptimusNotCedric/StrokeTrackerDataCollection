@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:csv/csv.dart';
+import 'package:face_detection_tflite/face_detection_tflite.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -320,26 +321,25 @@ class ExperimentLogger extends ChangeNotifier{
   }
 
   Future<void> clearAppDocumentsDirectory() async {
-  final dir = await getApplicationDocumentsDirectory();
+    final dir = await getApplicationDocumentsDirectory();
 
-  if (await dir.exists()) {
-    final files = dir.listSync();
+    if (await dir.exists()) {
+      final files = dir.listSync();
 
-    for (final file in files) {
-      try {
-        if (file is File) {
-          await file.delete();
-        } else if (file is Directory) {
-          await file.delete(recursive: true);
+      for (final file in files) {
+        try {
+          if (file is File) {
+            await file.delete();
+          } else if (file is Directory) {
+            await file.delete(recursive: true);
+          }
+        } catch (e) {
+          print("Error deleting $file: $e");
         }
-      } catch (e) {
-        print("Error deleting $file: $e");
       }
     }
+    print("ApplicationDocumentsDirectory cleared");
   }
-
-  print("ApplicationDocumentsDirectory cleared");
-}
 
 
   static Future<void> deleteAllLogFiles() async {
@@ -364,5 +364,79 @@ class ExperimentLogger extends ChangeNotifier{
     // Delete target if it exists (overwrite safely)
     await targetFile.writeAsString(await file.readAsString());
     }
-}
+  }
+
+  static String boundingBoxToString(BoundingBox box) {
+    return [box.left,box.top,box.right,box.bottom,].join(',');
+  }
+
+  static String faceMeshToString(FaceMesh mesh) {
+    final values = <String>[];
+
+    List<Point> points = mesh.points;
+    List<String> point = [];
+
+    for (var p in points) {
+      point.add(p.x.toString());
+      point.add(p.y.toString());
+      point.add(p.z.toString());
+      values.add("(${point.join(',')})");
+      point = [];
+    }
+
+  return values.join(',');
+  }
+
+  static Future<void> logFaceData(
+  List<(DateTime, Face)> faces,
+  String sessionId,
+  int repetition,
+  ) async {
+    final csvRows = <String>[];
+
+    for (final (time, face) in faces) {
+      if (face.mesh != null) {
+        final row =
+            '$sessionId,'
+            '$repetition,'
+            '${time.toIso8601String()},'
+            '${boundingBoxToString(face.boundingBox)},'
+            '${faceMeshToString(face.mesh!)}';
+
+        csvRows.add(row);
+      }
+    }
+
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/${sessionId}_faces.csv');
+
+    // append correctly
+    final sink = file.openWrite(mode: FileMode.append);
+
+    for (final row in csvRows) {
+      sink.writeln(row);
+    }
+
+    await sink.flush();
+    await sink.close();
+  }
+
+  static Future<List<File>> getAllFaceData() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final files = <File>[];
+
+    try {
+      await for (final entity in directory.list()) {
+        if (entity is File && entity.path.endsWith('faces.csv')) {
+          files.add(entity);
+        }
+      }
+    } catch (e) {
+      print('Error listing log files: $e');
+    }
+
+    // Sort by modification date, newest first
+    files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+    return files;
+  }
 }

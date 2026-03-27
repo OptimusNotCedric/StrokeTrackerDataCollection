@@ -48,7 +48,7 @@ class _StudySelectionState extends State<StudySelection> {
     StudyProtocol protocol = StudyProtocol();
     
     protocol.addParticipantId(participantId);
-    protocol.addSessionId("$participantId|${DateTime.now()}");
+    protocol.addSessionId("$participantId@${DateTime.now().toIso8601String()}");
 
      Navigator.push(
       context, platformPageRoute(

@@ -41,6 +41,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   Future<void>? _initializeControllerFuture;
   bool debugimagesaved = false;
   bool recording = false;
+  List<(DateTime, Face)> faceBuffer = [];
 
   @override
   void initState() {
@@ -74,7 +75,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     setState(() {
       recording = true;
     });
-
+    DateTime lastLoggedTime = DateTime.now().subtract(Duration(seconds: 1));
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       debugPrint("Kamera nicht bereit für Aufnahme.");
       return;
@@ -84,15 +85,17 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     try {
       await _cameraController!.startImageStream(
         (CameraImage image) async{
-          if (isProcessing) return;
-            isProcessing = true;
-          try {
-          DateTime imageTime = DateTime.now();
+          final now = DateTime.now();
+          if (now.difference(lastLoggedTime).inMilliseconds <= 500) {
+            return;
+          }
+          lastLoggedTime = now;
           final cv.Mat? mat = await _convertCameraImageToMat(image);
           if (mat != null ) {
             List<Face> faces = await widget.faceDetector.detectFacesFromMat(mat, mode: FaceDetectionMode.standard);
             if (faces.isNotEmpty) {
-              FaceMesh? faceMesh = faces.first.mesh;
+              Face face = faces.first;
+              faceBuffer.add((now, face));
               /*
               if (!debugimagesaved) {
               _saveDebugMeshImage(mat.clone(), faces.first);
@@ -103,13 +106,10 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
             
             mat.dispose();
             
-            
           } else {
             print("no Image for face recognition");
           }
-          } finally {
-            isProcessing = false;
-          }
+          
 
         });
       
@@ -178,9 +178,14 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   }
 
   Future<void> _stopVideoRecording() async {
+    if (!recording) {
+      return;
+    }
     setState(() {
       recording = false;
     });
+
+    
     if (_cameraController == null) {
       return;
     }
@@ -197,6 +202,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     } catch (e) {
       debugPrint("Fehler beim Stoppen der Videoaufnahme: $e");
     }
+    await flushBuffer();
     finishTask();
   }
 
@@ -329,6 +335,12 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     } catch (e) {
       return null;
     }
+  }
+
+  Future<void> flushBuffer() async {
+    print("Flushing Buffer");
+    print("${faceBuffer.length}");
+    await ExperimentLogger.logFaceData(faceBuffer, widget.recordingId, widget.currentRepetition);
   }
 
   int? _rotationFlagForFrame({

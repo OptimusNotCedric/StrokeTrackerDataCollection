@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 
-class SummaryScreen extends StatelessWidget {
+class SummaryScreen extends StatefulWidget {
+  const SummaryScreen({super.key});
+
+  @override
+  State<SummaryScreen> createState() => _SummaryScreenState();
+}
+
+class _SummaryScreenState extends State<SummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -21,32 +26,41 @@ class SummaryScreen extends StatelessWidget {
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
+
             const SizedBox(height: 20),
+
             const Text(
-              "Your recordings and logs are ready. You can download or share them below.",
+              "Your recordings and logs are ready. Export them below.",
               style: TextStyle(fontSize: 18),
               textAlign: TextAlign.center,
             ),
+
             const SizedBox(height: 50),
+
+            // ================= LOGS =================
             ElevatedButton.icon(
-              onPressed: _exportRecordingsX,
-              icon: const Icon(Icons.download),
-              label: const Text("Download Logs"),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                textStyle: const TextStyle(fontSize: 20),
-              ),
+              onPressed: () => _showExportDialog(type: "logs"),
+              icon: const Icon(Icons.description),
+              label: const Text("Export Logs"),
             ),
-            if (true)
+
             const SizedBox(height: 20),
+
+            // ================= FACEMESH =================
+            ElevatedButton.icon(
+              onPressed: () => _showExportDialog(type: "facemesh"),
+              icon: const Icon(Icons.face),
+              label: const Text("Export FaceMesh Data"),
+            ),
+
+            const Spacer(),
+
             ElevatedButton(
               onPressed: _deleteLogs,
-              child: const Text("Exit"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                textStyle: const TextStyle(fontSize: 18),
               ),
+              child: const Text("Exit"),
             ),
           ],
         ),
@@ -54,47 +68,82 @@ class SummaryScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _exportRecordings() async {
-
-    try {
-      print("recordings");
-      String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-      print("SelectedRecordings");
-      if (selectedDirectory == null) {
-        // User canceled the picker
-        return;
-      }
-
-      await ExperimentLogger.copyToOther(selectedDirectory);
-      
-    } catch (e) {
-      
-      print(e);
-    } 
+  // ================= DIALOG =================
+  Future<void> _showExportDialog({required String type}) async {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text("Export Data"),
+          content: const Text("Choose what you want to export"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                _exportSingle(type);
+              },
+              child: const Text("Current File"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                _exportAll(type);
+              },
+              child: const Text("All Files"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  Future<void> _exportRecordingsX() async {
-    try {
-        print("recordings");
-        List<File> files = await ExperimentLogger.getAllLogFiles();
-        List<XFile> xFiles = [];
-        // Share the file
-        for (File file in files) {
-          xFiles.add(XFile(file.path));
-          print(file.path);
-        }
-        final params = ShareParams(files: xFiles, text: "Recordings");
-        final result = await SharePlus.instance.share(params);
-        if (result.status == ShareResultStatus.success) {
-          print("Successfully exported");
-        }
-    } catch (e) {
-        print(e);
+  // ================= SINGLE EXPORT =================
+  Future<void> _exportSingle(String type) async {
+    List<File> files;
+
+    if (type == "logs") {
+      files = await ExperimentLogger.getAllLogFiles();
+    } else {
+      files = await ExperimentLogger.getAllFaceData();
     }
+
+    if (files.isEmpty) return;
+
+    final file = files.last;
+
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path)],
+      ),
+    );
   }
 
+  // ================= ALL EXPORT =================
+  Future<void> _exportAll(String type) async {
+    List<File> files;
+
+    if (type == "logs") {
+      files = await ExperimentLogger.getAllLogFiles();
+    } else {
+      files = await ExperimentLogger.getAllFaceData();
+    }
+
+    final xFiles = files.map((f) => XFile(f.path)).toList();
+
+    await SharePlus.instance.share(
+      ShareParams(
+        files: xFiles,
+      ),
+    );
+  }
+
+  // ================= DELETE =================
   Future<void> _deleteLogs() async {
     await ExperimentLogger.deleteAllLogFiles();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("All logs deleted")),
+      );
+    }
   }
-  
 }
