@@ -4,8 +4,11 @@ import 'dart:io';
 import 'package:share_plus/share_plus.dart';
 
 class SummaryScreen extends StatefulWidget {
-  const SummaryScreen({super.key});
-
+  final VoidCallback onLeaveStudy;
+  const SummaryScreen({super.key,
+  required this.onLeaveStudy,
+  });
+  
   @override
   State<SummaryScreen> createState() => _SummaryScreenState();
 }
@@ -14,11 +17,13 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Study Summary")),
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
+        child: Center(
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text(
@@ -54,18 +59,16 @@ class _SummaryScreenState extends State<SummaryScreen> {
             ),
 
             const Spacer(),
-
-            ElevatedButton(
-              onPressed: _deleteLogs,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey,
-              ),
+            Padding(
+            padding: EdgeInsetsGeometry.only(bottom: 20),
+            child: ElevatedButton(
+              onPressed: widget.onLeaveStudy,
               child: const Text("Exit"),
-            ),
+            ),),
           ],
         ),
-      ),
-    );
+      ),),
+    ));
   }
 
   // ================= DIALOG =================
@@ -107,7 +110,12 @@ class _SummaryScreenState extends State<SummaryScreen> {
       files = await ExperimentLogger.getAllFaceData();
     }
 
-    if (files.isEmpty) return;
+    if (files.isEmpty){
+      if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No files found")),
+      );
+    }
 
     final file = files.last;
 
@@ -117,7 +125,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
       ),
     );
   }
-
+  }
   // ================= ALL EXPORT =================
   Future<void> _exportAll(String type) async {
     List<File> files;
@@ -127,7 +135,14 @@ class _SummaryScreenState extends State<SummaryScreen> {
     } else {
       files = await ExperimentLogger.getAllFaceData();
     }
-
+    if (files.isEmpty){
+      if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No files found")),
+      );
+      return;
+    }}
+      
     final xFiles = files.map((f) => XFile(f.path)).toList();
 
     await SharePlus.instance.share(
@@ -135,15 +150,5 @@ class _SummaryScreenState extends State<SummaryScreen> {
         files: xFiles,
       ),
     );
-  }
-
-  // ================= DELETE =================
-  Future<void> _deleteLogs() async {
-    await ExperimentLogger.deleteAllLogFiles();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("All logs deleted")),
-      );
-    }
   }
 }

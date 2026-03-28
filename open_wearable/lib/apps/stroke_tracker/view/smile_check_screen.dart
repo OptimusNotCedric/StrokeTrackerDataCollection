@@ -43,6 +43,9 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   bool recording = false;
   List<(DateTime, Face)> faceBuffer = [];
 
+  int countdown = 10;
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
@@ -75,6 +78,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     setState(() {
       recording = true;
     });
+    _startTimer();
     DateTime lastLoggedTime = DateTime.now().subtract(Duration(seconds: 1));
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       debugPrint("Kamera nicht bereit für Aufnahme.");
@@ -181,10 +185,11 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     if (!recording) {
       return;
     }
+    
     setState(() {
       recording = false;
     });
-
+    _timer?.cancel();
     
     if (_cameraController == null) {
       return;
@@ -215,7 +220,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     if (_cameraController?.value.isStreamingImages ?? false) {
       _cameraController!.stopImageStream();
     }
-  
+    _timer?.cancel();
     _cameraController?.dispose();
     super.dispose();
   }
@@ -378,34 +383,43 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
         : DeviceOrientation.landscapeLeft;
   }
 
+  void _startTimer() {
+  countdown = 10;
+
+  _timer?.cancel();
+  _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    if (countdown == 0) {
+      timer.cancel();
+      _stopVideoRecording();
+    } else {
+      setState(() {
+        countdown--;
+      });
+    }
+  });
+}
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
             children: [
-              // Kamera
-              Expanded(
-                flex: 1,
-                child: Container(
-                  width: double.infinity,
-                  color: Colors.black,
+              Padding(
+                padding: const EdgeInsets.only(top: 80), 
+                child: Center(
                   child: FutureBuilder<void>(
                     future: _initializeControllerFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.done &&
                           _cameraController != null &&
                           _cameraController!.value.isInitialized) {
-                        return ClipRect(
-                          child: FittedBox(
-                            fit: BoxFit.cover,
-                            child: SizedBox(
-                              width:
-                                  _cameraController!.value.previewSize!.height,
-                              height:
-                                  _cameraController!.value.previewSize!.width,
-                              child: CameraPreview(_cameraController!),
-                            ),
+
+                        return AspectRatio(
+                          aspectRatio: _cameraController!.value.aspectRatio,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: CameraPreview(_cameraController!),
                           ),
                         );
                       } else {
@@ -415,21 +429,85 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                       }
                     },
                   ),
+                ),),
+              Positioned(
+                top: 30,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Align(
+                  alignment: AlignmentGeometry.topCenter,
+                  child: Text(
+                    "Align the face inside the frame and give give instruction to smile after pressing the button",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
                 ),
               ),
+              Center(
+                child: Container(
+                  width: 450,
+                  height: 500,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.greenAccent, width: 3),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 80,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Text(
+                    recording ? "$countdown" : "",
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              /*
               Positioned(
                 top: null,
                 bottom: null,
                 right: 16,
                 height: MediaQuery.of(context).size.height,
                 child: Center(
-                  
                   child: SizedBox(
                   width: 80,
                   height: 60,
                   child: PlatformElevatedButton(onPressed:recording? _stopVideoRecording: _startVideoRecording, child: recording? Icon(Icons.pause, size: 36,): Icon(Icons.play_arrow, size: 36,),)
                 ),),),
-                        
+              */
+              Positioned(
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 16,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: recording ? _stopVideoRecording : _startVideoRecording,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: recording ? Colors.red : Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        recording ? Icons.stop : Icons.play_arrow,
+                        size: 40,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              
             ]
       ));
   }

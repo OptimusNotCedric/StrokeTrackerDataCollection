@@ -367,7 +367,12 @@ class ExperimentLogger extends ChangeNotifier{
   }
 
   static String boundingBoxToString(BoundingBox box) {
-    return [box.left,box.top,box.right,box.bottom,].join(',');
+    return [
+      [box.topLeft.x, box.topLeft.y].join(';'),
+      [box.topRight.x, box.topRight.y].join(';'),
+      [box.bottomLeft.x, box.bottomLeft.y].join(';'),
+      [box.bottomRight.x, box.bottomRight.y].join(';'),
+    ].join(',');
   }
 
   static String faceMeshToString(FaceMesh mesh) {
@@ -380,7 +385,7 @@ class ExperimentLogger extends ChangeNotifier{
       point.add(p.x.toString());
       point.add(p.y.toString());
       point.add(p.z.toString());
-      values.add("(${point.join(',')})");
+      values.add("(${point.join(';')})");
       point = [];
     }
 
@@ -409,7 +414,18 @@ class ExperimentLogger extends ChangeNotifier{
 
     final dir = await getApplicationDocumentsDirectory();
     final file = File('${dir.path}/${sessionId}_faces.csv');
-
+    if (!await file.exists()) {
+      List<String> header = [];
+      header.add("SessionId");
+      header.add("RepetitionNumber");
+      header.add("TimeStamp");
+      header.add("box.left,box.top,box.right,box.bottom");
+      
+      for (int i = 0; i < faces.length; i++) {
+        header.add("Point $i x;y;z");
+      }
+      file.writeAsString(header.join(","));
+    }
     // append correctly
     final sink = file.openWrite(mode: FileMode.append);
 

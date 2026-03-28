@@ -19,13 +19,9 @@ class InstructionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Wir verwenden einen GlobalKey, um den Scaffold manuell zu öffnen.
-    // Normalerweise würde man einen AppBar verwenden, aber da InstructionScreen
-    // keinen hat, ist dies die gängige Methode für eine freistehende Drawer-Öffnung.
-    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    
 
     return Scaffold(
-      key: _scaffoldKey,
       body: Stack(
         children: [
           Padding(
@@ -110,19 +106,7 @@ class InstructionScreen extends StatelessWidget {
 
                 const SizedBox(height: 12), // Abstand
 
-                // 5. 'SizedBox' sorgt für die volle Breite
               ],
-            ),
-          ),
-          Positioned(
-            // <--- Positioned ist direkt im children-Array des Stacks
-            top: 16 + MediaQuery.of(context).padding.top,
-            right: 16,
-            child: IconButton(
-              icon: const Icon(Icons.menu, size: 30),
-              onPressed: () {
-                _scaffoldKey.currentState?.openEndDrawer();
-              },
             ),
           ),
         ],

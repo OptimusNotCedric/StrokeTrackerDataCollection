@@ -4,6 +4,7 @@ import 'package:open_earable_flutter/open_earable_flutter.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_protocol.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/demographics_survey.dart';
+import 'package:open_wearable/apps/stroke_tracker/view/download_page.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/end_page.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 import 'package:provider/provider.dart';
@@ -76,7 +77,7 @@ class _StudySelectionState extends State<StudySelection> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SummaryScreen(),
+                  builder: (context) => DownloadScreen(),
                 ),
                 );
             },

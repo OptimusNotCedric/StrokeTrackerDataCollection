@@ -1,6 +1,6 @@
 //to distinguishe different screens during the study
 
-enum StudyStepType { instruction, measuring, cameraMeasurement, labeling}
+enum StudyStepType { instruction, measuring, cameraMeasurement, ending}
 
 class StudyStep {
   final StudyStepType type;

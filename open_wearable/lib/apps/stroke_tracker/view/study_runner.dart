@@ -130,7 +130,6 @@ class _StudyRunnerState extends State<StudyRunner> {
     await _logger.stopAndWriteLogging(false);
     final currentStep = _steps[_currentIndex];
     final maxRepetitions = currentStep.repetitions;
-    
     await Navigator.push(context, 
     MaterialPageRoute(
     builder: (context) => TaskScreen(
@@ -139,7 +138,8 @@ class _StudyRunnerState extends State<StudyRunner> {
       logger: _logger, 
       currentStepNumber: _currentIndex,
       currentStepTask: _steps[_currentIndex].heading,),
-    ),);
+    ),
+    );
     setState(() {
 
       if (_repetitionCounter < maxRepetitions) {
@@ -154,16 +154,15 @@ class _StudyRunnerState extends State<StudyRunner> {
     });
   }
 
-  Future<void> _leaveStudy(bool needToSave) async {
+  Future<void> _leaveStudy() async {
     print("leave_Study");
     await _manager.deactivateSensors();
 
-    if (needToSave) {
       try {
         _logger.logTaskEnd();
         await _logger.stopAndWriteLogging(false);
       } catch (_) {}
-    }
+    
 
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
@@ -186,7 +185,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     if (_currentIndex < _steps.length - 1) {
       setState(() => _currentIndex++);
     } else {
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => SummaryScreen()));
+      _leaveStudy();
     }
   }
 
@@ -222,7 +221,7 @@ class _StudyRunnerState extends State<StudyRunner> {
             heading: step.heading,
             description: step.description,
             onNext: _nextStep,
-            onLeaveStudy: () => _leaveStudy(false),
+            onLeaveStudy: _leaveStudy,
           );
         }
 
@@ -238,6 +237,9 @@ class _StudyRunnerState extends State<StudyRunner> {
             recordingId: widget.protocol.sessionId);
         }
 
+        if (step.type == StudyStepType.ending) {
+          return SummaryScreen(onLeaveStudy: _leaveStudy,);
+        }
         return PlatformScaffold(
             appBar: PlatformAppBar(title: Text("Fehler")),
             body: Center(
@@ -247,6 +249,7 @@ class _StudyRunnerState extends State<StudyRunner> {
               ),
             ),
           );
+        
       },
     );
   }

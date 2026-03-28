@@ -20,8 +20,9 @@ class StudyProtocol {
       ),
     StudyStep(
       type: StudyStepType.cameraMeasurement,
-      repetitions: 5,
-    )
+      repetitions: 3,
+    ),
+    StudyStep(type: StudyStepType.ending),
     
 
   ];

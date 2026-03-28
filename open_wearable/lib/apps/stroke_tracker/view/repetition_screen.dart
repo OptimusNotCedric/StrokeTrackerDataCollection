@@ -61,6 +61,11 @@ class _LikertChoiceState extends State<LikertChoice> {
   }
 }
 
+enum Side {
+  left,
+  right,
+}
+
 class TaskScreen extends StatefulWidget{
   final int currentRepetition;
   final int maxRepetition;
@@ -85,7 +90,9 @@ class TaskScreen extends StatefulWidget{
 class _TaskScreenState extends State<TaskScreen> {
   
   late Widget _likertWidget;
-  late int score;
+  int score = 0;
+  Side? selectedSide;
+
 
   @override
   void initState() {
@@ -95,8 +102,13 @@ class _TaskScreenState extends State<TaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Repetition Task")),
+    return PopScope(
+      canPop: false,
+    child: Scaffold(
+      appBar: AppBar(
+        title: const Text("Repetition Task"),
+        automaticallyImplyLeading: false,
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -106,13 +118,12 @@ class _TaskScreenState extends State<TaskScreen> {
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 30),
-            if (widget.currentRepetition <= widget.maxRepetition)
-              _likertWidget
-            ,
+            _likertWidget,
+            if (score >= 4) _buildSideSelector(),
             ElevatedButton(
               onPressed: pressExitButton,
               child: Text(
-                widget.currentRepetition <= widget.maxRepetition
+                widget.currentRepetition < widget.maxRepetition
                     ? "Start/Repeat Task"
                     : "Done",
               ),
@@ -120,7 +131,7 @@ class _TaskScreenState extends State<TaskScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildLikertScale(){
@@ -136,8 +147,45 @@ class _TaskScreenState extends State<TaskScreen> {
 
   }
 
+  Widget _buildSideSelector() {
+    return Column(
+      children: [
+        const SizedBox(height: 20),
+        const Text(
+          "Which side is the impairment (From perspective of the patient)?",
+          style: TextStyle(fontSize: 18),
+        ),
+        const SizedBox(height: 10),
+
+        SegmentedButton<Side>(
+          segments: const <ButtonSegment<Side>>[
+            ButtonSegment(
+              value: Side.left,
+              label: Text("Left"),
+              icon: Icon(Icons.arrow_left),
+            ),
+            ButtonSegment(
+              value: Side.right,
+              label: Text("Right"),
+              icon: Icon(Icons.arrow_right),
+            ),
+          ],
+          selected: selectedSide != null ? {selectedSide!} : <Side>{},
+          onSelectionChanged: (Set<Side> newSelection) {
+            setState(() {
+              selectedSide = newSelection.first;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
   void pressExitButton(){
     widget.logger.logOtherEvent(widget.currentRepetition, "Evaluation", widget.currentStepTask, score.toString());
+    if(selectedSide != null && score >= 4) {
+      widget.logger.logOtherEvent(widget.currentRepetition, "Side of impairment", widget.currentStepTask, selectedSide.toString().split(".").last);
+    }
     Navigator.of(context).pop();
   }
 
