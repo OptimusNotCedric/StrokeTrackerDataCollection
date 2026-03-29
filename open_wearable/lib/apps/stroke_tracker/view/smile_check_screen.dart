@@ -1,16 +1,15 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:face_detection_tflite/face_detection_tflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
 import 'package:share_plus/share_plus.dart';
 
-class MeasuringScreen extends StatefulWidget {
+class CameraMeasuringScreen extends StatefulWidget {
   final int repetitions;
   final int currentRepetition;
   final VoidCallback onNext;  
@@ -20,7 +19,8 @@ class MeasuringScreen extends StatefulWidget {
   final ExperimentLogger logger;
   final String recordingId;
 
-  const MeasuringScreen({
+
+  const CameraMeasuringScreen({
     super.key,
     required this.repetitions,
     required this.onNext,
@@ -33,15 +33,19 @@ class MeasuringScreen extends StatefulWidget {
   });
 
   @override
-  State<MeasuringScreen> createState() => _MeasuringScreenState();
+  State<CameraMeasuringScreen> createState() => _CameraMeasuringScreenState();
 }
 
-class _MeasuringScreenState extends State<MeasuringScreen> {
+class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
   CameraController? _cameraController;
   Future<void>? _initializeControllerFuture;
   bool debugimagesaved = false;
   bool recording = false;
-  List<(DateTime, Face)> faceBuffer = [];
+  List<(DateTime, Face,int, int)> faceBuffer = [];
+
+  CameraLensDirection cameraLensDirection = CameraLensDirection.back;
+
+  int millisecBetweenRecordedFrames= 250;
 
   int countdown = 10;
   Timer? _timer;
@@ -56,7 +60,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     try {
       final cameras = await availableCameras();
       final backCamera = cameras.firstWhere(
-        (cam) => cam.lensDirection == CameraLensDirection.front,
+        (cam) => cam.lensDirection == cameraLensDirection,
         orElse: () => cameras.first,
       );
 
@@ -85,12 +89,11 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       return;
     }
     widget.startMeasuring();
-    bool isProcessing = false;
     try {
       await _cameraController!.startImageStream(
         (CameraImage image) async{
           final now = DateTime.now();
-          if (now.difference(lastLoggedTime).inMilliseconds <= 500) {
+          if (now.difference(lastLoggedTime).inMilliseconds <= millisecBetweenRecordedFrames) {
             return;
           }
           lastLoggedTime = now;
@@ -99,7 +102,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
             List<Face> faces = await widget.faceDetector.detectFacesFromMat(mat, mode: FaceDetectionMode.standard);
             if (faces.isNotEmpty) {
               Face face = faces.first;
-              faceBuffer.add((now, face));
+              faceBuffer.add((now, face, mat.height, mat.width));
               /*
               if (!debugimagesaved) {
               _saveDebugMeshImage(mat.clone(), faces.first);
@@ -400,13 +403,14 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 }
   @override
   Widget build(BuildContext context) {
-    
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      child:  Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 80), 
+                padding: const EdgeInsets.only(top: 80, bottom: 30), 
                 child: Center(
                   child: FutureBuilder<void>(
                     future: _initializeControllerFuture,
@@ -438,7 +442,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                 child: Align(
                   alignment: AlignmentGeometry.topCenter,
                   child: Text(
-                    "Align the face inside the frame and give give instruction to smile after pressing the button",
+                    "Align the face inside the frame and give instruction to smile after pressing the button",
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
@@ -469,19 +473,6 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                   ),
                 ),
               ),
-              /*
-              Positioned(
-                top: null,
-                bottom: null,
-                right: 16,
-                height: MediaQuery.of(context).size.height,
-                child: Center(
-                  child: SizedBox(
-                  width: 80,
-                  height: 60,
-                  child: PlatformElevatedButton(onPressed:recording? _stopVideoRecording: _startVideoRecording, child: recording? Icon(Icons.pause, size: 36,): Icon(Icons.play_arrow, size: 36,),)
-                ),),),
-              */
               Positioned(
                 top: 0,
                 bottom: 0,
@@ -507,8 +498,15 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                   ),
                 ),
               ),
+              Text(
+                    "Repetition ${widget.currentRepetition} / ${widget.repetitions}",
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 14,
+                    ),
+                  ),
               
             ]
-      ));
+      )));
   }
 }

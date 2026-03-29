@@ -1,5 +1,7 @@
 //to distinguishe different screens during the study
 
+import 'dart:math';
+
 enum StudyStepType { instruction, measuring, cameraMeasurement, ending}
 
 class StudyStep {
@@ -12,6 +14,7 @@ class StudyStep {
   final bool debugMode;
   final bool secondaryDescription;
   final String secondaryDescriptionString;
+  late final List<int> instructionOrder;
 
   StudyStep({
     required this.type,
@@ -23,5 +26,14 @@ class StudyStep {
     this.debugMode = false,
     this.secondaryDescription = false,
     this.secondaryDescriptionString = "",
+    
+  }){
+    final random = Random(DateTime.now().second); // seed = timestamp
+
+  instructionOrder = List.generate(repetitions, (_) {
+    return 0 + random.nextInt(measuringInstructions.length);
   });
+  }
+
+
 }

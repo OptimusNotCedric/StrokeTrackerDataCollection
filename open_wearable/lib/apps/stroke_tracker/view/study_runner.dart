@@ -9,6 +9,7 @@ import 'package:open_wearable/apps/stroke_tracker/model/study_protocol.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/end_page.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/instruction_screen.dart';
+import 'package:open_wearable/apps/stroke_tracker/view/measuring_page.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/repetition_screen.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/smile_check_screen.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/study_selector.dart';
@@ -226,19 +227,33 @@ class _StudyRunnerState extends State<StudyRunner> {
         }
 
         if (step.type == StudyStepType.cameraMeasurement) {
-          return MeasuringScreen(
+          return CameraMeasuringScreen(
             currentRepetition: _repetitionCounter, 
-            repetitions: _repetitionCounter, 
+            repetitions: step.repetitions, 
             onNext: _saveAndAdvance, 
             startMeasuring: _startMeasuring, 
             stopMeasuring: _stopAndConfirm, 
             logger: _logger,
             faceDetector: _faceDetectorIsolate,
-            recordingId: widget.protocol.sessionId);
+            recordingId: widget.protocol.sessionId,
+            );
         }
 
         if (step.type == StudyStepType.ending) {
           return SummaryScreen(onLeaveStudy: _leaveStudy,);
+        }
+
+        if (step.type == StudyStepType.measuring) {
+          return MeasuringScreen(
+            repetitions: step.repetitions, 
+            onNext: _saveAndAdvance, 
+            startMeasuring: _startMeasuring, 
+            stopMeasuring: _stopAndConfirm, 
+            currentRepetition: _repetitionCounter, 
+            logger: _logger, 
+            recordingId: widget.protocol.sessionId, 
+            taskName: step.heading, 
+            instruction: step.measuringInstructions[step.instructionOrder[_repetitionCounter-1]]);
         }
         return PlatformScaffold(
             appBar: PlatformAppBar(title: Text("Fehler")),

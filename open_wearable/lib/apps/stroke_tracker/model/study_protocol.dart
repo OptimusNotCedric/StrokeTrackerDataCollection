@@ -12,7 +12,8 @@ class StudyProtocol {
     sessionId = id;
   }
 
-  List<StudyStep> getSteps() => [
+  List<StudyStep> getSteps() => 
+     [
     StudyStep(
       type: StudyStepType.instruction,
       heading: "Smiling",
@@ -22,8 +23,25 @@ class StudyProtocol {
       type: StudyStepType.cameraMeasurement,
       repetitions: 3,
     ),
+    StudyStep(
+      type: StudyStepType.instruction,
+      heading: "Turn Head",
+      description: "During the recording turn your head"
+      ),
+    StudyStep(
+      type: StudyStepType.measuring,
+      measuringInstructions: ["Instruct the patient to turn the head from right to left", "Instruct the patient to turn the head from left to right"],
+      repetitions: 3,
+    ),
+    StudyStep(
+      type: StudyStepType.instruction,
+      heading: "Tap Earables",
+      description: "During the recording Tap both earables"
+      ),
+    StudyStep(
+      type: StudyStepType.measuring,
+      repetitions: 3,
+    ),
     StudyStep(type: StudyStepType.ending),
-    
-
-  ];
+    ];
 }

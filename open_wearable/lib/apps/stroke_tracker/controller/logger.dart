@@ -393,18 +393,20 @@ class ExperimentLogger extends ChangeNotifier{
   }
 
   static Future<void> logFaceData(
-  List<(DateTime, Face)> faces,
+  List<(DateTime, Face, int, int)> faces,
   String sessionId,
   int repetition,
   ) async {
     final csvRows = <String>[];
 
-    for (final (time, face) in faces) {
+    for (final (time, face, height, width) in faces) {
       if (face.mesh != null) {
         final row =
             '$sessionId,'
             '$repetition,'
             '${time.toIso8601String()},'
+            '$width'
+            '$height'
             '${boundingBoxToString(face.boundingBox)},'
             '${faceMeshToString(face.mesh!)}';
 
@@ -419,6 +421,8 @@ class ExperimentLogger extends ChangeNotifier{
       header.add("SessionId");
       header.add("RepetitionNumber");
       header.add("TimeStamp");
+      header.add("Imagewidth");
+      header.add("Imageheight");
       header.add("box.left,box.top,box.right,box.bottom");
       
       for (int i = 0; i < faces.length; i++) {

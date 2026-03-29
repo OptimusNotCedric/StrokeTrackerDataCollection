@@ -53,16 +53,16 @@ class _DownloadScreenState extends State<DownloadScreen> {
               icon: const Icon(Icons.face),
               label: const Text("Export FaceMesh Data"),
             ),
-            /*
+            
             const Spacer(),
 
             ElevatedButton(
               onPressed: _deleteLogs,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey,
+                backgroundColor: Colors.red,
               ),
-              child: const Text("Exit"),
-            ),*/
+              child: const Text("Delete Logs"),
+            ),
           ],
         ),
       ),),

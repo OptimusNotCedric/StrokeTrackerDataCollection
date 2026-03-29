@@ -56,8 +56,9 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
   @override
   Widget build(BuildContext context){
     
-
-    return PlatformScaffold(
+    return PopScope(
+      canPop: false,
+      child: PlatformScaffold(
       appBar: PlatformAppBar(title: PlatformText("Fill out the Survey"),),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(10),
@@ -153,7 +154,7 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
         
       ),
       )
-    );
+    ));
   }
 
   void _continueButtonPressed(){

@@ -103,7 +103,7 @@ class ExperimentManager {
   ) {
     if (sensorId != null && sensorIdToConfigMap.containsKey(sensorId)) {
       final cfg = sensorIdToConfigMap[sensorId]!;
-
+      print("Started ConfigProvider");
       if (cfg is SensorFrequencyConfiguration) {
         List<SensorConfigurationValue> values =
             cfgProvider.getSensorConfigurationValues(cfg, distinct: true);
@@ -163,7 +163,7 @@ class ExperimentManager {
         "The right wearable does not support sensor configuration",
       );
     }
-
+    print("Started ConfigureSensor");
     // Configure each sensor according to the global configuration
     for (var sensorConfig in expConfig.globalSensorConfigs) {
       final sensorName = sensorConfig.sensor.toLowerCase();
@@ -264,7 +264,7 @@ class ExperimentManager {
         rightWearable is! SensorConfigurationManager)) {
       return;
     }
-
+    print("deactivated sensors");
     await _leftSubscription?.cancel();
     await _rightSubscription?.cancel();
 

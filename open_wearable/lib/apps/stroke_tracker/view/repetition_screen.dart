@@ -42,7 +42,7 @@ class _LikertChoiceState extends State<LikertChoice> {
         ),
         ButtonSegment<int>(
           value: 4,
-          label: Text("Somewhat likely presen"),
+          label: Text("Somewhat likely present"),
         ),
         ButtonSegment<int>(
           value: 5,
@@ -86,13 +86,11 @@ class TaskScreen extends StatefulWidget{
   State<TaskScreen> createState() => _TaskScreenState();
 }
 
-
 class _TaskScreenState extends State<TaskScreen> {
-  
   late Widget _likertWidget;
   int score = 0;
   Side? selectedSide;
-
+  bool wrongSelection = false;
 
   @override
   void initState() {
@@ -118,10 +116,37 @@ class _TaskScreenState extends State<TaskScreen> {
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 30),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                "Please rate the pathology severity on a scale from 1 (no impairment) to 5 (severe impairment).",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
             _likertWidget,
             if (score >= 4) _buildSideSelector(),
+            if (!canGoNext())
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  "Please complete all required selections",
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: pressExitButton,
+              onPressed: canGoNext() ? pressExitButton : null,
               child: Text(
                 widget.currentRepetition < widget.maxRepetition
                     ? "Start/Repeat Task"
@@ -143,8 +168,12 @@ class _TaskScreenState extends State<TaskScreen> {
     setState(() {
       score = newScore;
     });
-    
+  }
 
+  
+
+  bool canGoNext() {
+    return score > 0 ? (score >= 4 ? (selectedSide != null? true :false) : true) : false;
   }
 
   Widget _buildSideSelector() {
@@ -166,14 +195,22 @@ class _TaskScreenState extends State<TaskScreen> {
             ),
             ButtonSegment(
               value: Side.right,
-              label: Text("Right"),
-              icon: Icon(Icons.arrow_right),
+              label: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Text("Right"),
+                SizedBox(width: 4),
+                Icon(Icons.arrow_right),
+              ],
+            ),
             ),
           ],
           selected: selectedSide != null ? {selectedSide!} : <Side>{},
+          multiSelectionEnabled: false,
+          emptySelectionAllowed: true, 
           onSelectionChanged: (Set<Side> newSelection) {
             setState(() {
-              selectedSide = newSelection.first;
+              selectedSide = newSelection.isNotEmpty ? newSelection.first : null;
             });
           },
         ),
