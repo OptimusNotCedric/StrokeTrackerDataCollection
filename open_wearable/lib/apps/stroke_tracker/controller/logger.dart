@@ -98,31 +98,13 @@ class ExperimentLogger extends ChangeNotifier{
 
   late File _stepsCsvFile;
   late File _otherCsvFile;
-  late File _syncLeftCsvFile;
-  late File _syncRightCsvFile;
 
   late String sessionID;
   late DateTime _sessionStartTime;
   final List<StepEvent> _stepEvents = [];
   final List<OtherEvent> _otherEvents = [];
-  final List<SyncEvent> _syncLeftEvents = [];
-  final List<SyncEvent> _syncRightEvents = [];
-  Completer<void>? _sensorsReady;
 
   File get csvFile => _stepsCsvFile;
-  Future<void> get sensorsReady {
-    // If both are already satisfied, just return immediately
-    if (_syncLeftEvents.isNotEmpty && _syncRightEvents.isNotEmpty) {
-      return Future.value();
-    }
-
-    // Create a new pending completer if none exists or the old one is completed
-    if (_sensorsReady == null || _sensorsReady!.isCompleted) {
-      _sensorsReady = Completer<void>();
-    }
-
-    return _sensorsReady!.future;
-  }
 
   Future<void> startLogging(bool sync, String newSessionID) async {
     sessionID = newSessionID;
@@ -133,9 +115,6 @@ class ExperimentLogger extends ChangeNotifier{
       _otherCsvFile = File('${dir.path}/other_log.csv');
     }
 
-    _syncLeftCsvFile = File('${dir.path}/sync_left_log.csv');
-    _syncRightCsvFile = File('${dir.path}/sync_right_log.csv');
-
     if (!await _stepsCsvFile.exists()){
       _stepsCsvFile.writeAsString(_stepsCsvHeader);
     }
@@ -144,15 +123,6 @@ class ExperimentLogger extends ChangeNotifier{
       _otherCsvFile.writeAsString(_otherCsvHeader);
     }
 
-    if (!await _syncLeftCsvFile.exists()){
-      _syncLeftCsvFile.writeAsString(_syncCsvHeader);
-    }
-
-    if (!await _syncRightCsvFile.exists()){
-      _syncRightCsvFile.writeAsString(_syncCsvHeader);
-    }
-
-    _sensorsReady = null;
     _sessionStartTime = DateTime.now();
   }
 
@@ -176,31 +146,6 @@ class ExperimentLogger extends ChangeNotifier{
     _otherEvents.add(event);
   }
 
-  void logSyncLeftEvent(int deviceTimestamp) {
-    final now = DateTime.now();
-    final relative = now.difference(_sessionStartTime).inMilliseconds;
-    final event = SyncEvent(
-      deviceTimestamp: deviceTimestamp,
-      phoneTimestamp: now,
-      relativePhoneTime: relative,
-    );
-    print(event.toCsvRow(sessionID));
-    _syncLeftEvents.add(event);
-    _checkReady();
-  }
-
-  void logSyncRightEvent(int deviceTimestamp) {
-    final now = DateTime.now();
-    final relative = now.difference(_sessionStartTime).inMilliseconds;
-    final event = SyncEvent(
-      deviceTimestamp: deviceTimestamp,
-      phoneTimestamp: now,
-      relativePhoneTime: relative,
-    );
-    print(event.toCsvRow(sessionID));
-    _syncRightEvents.add(event);
-    _checkReady();
-  }
 
   void logTaskStart(
     int blockNumber,
@@ -238,24 +183,11 @@ class ExperimentLogger extends ChangeNotifier{
     final converter = ListToCsvConverter();
 
     final syncLeftRows = <List<String>>[];
-    
-    for (final e in _syncLeftEvents) {
-      syncLeftRows.add(e.toCsvRow(sessionID));
-    }
 
     final syncRightRows = <List<String>>[];
-    
-    for (final e in _syncRightEvents) {
-      syncRightRows.add(e.toCsvRow(sessionID));
-    }
 
     final syncLeftCsvData = converter.convert(syncLeftRows);
     final syncRightCsvData = converter.convert(syncRightRows);
-
-    await Future.wait([
-      _syncLeftCsvFile.writeAsString("\n$syncLeftCsvData", mode: FileMode.append),
-      _syncRightCsvFile.writeAsString("\n$syncRightCsvData", mode: FileMode.append),
-    ]);
 
     if (!sync) {
       final stepsRows = <List<String>>[];
@@ -278,10 +210,6 @@ class ExperimentLogger extends ChangeNotifier{
 
     _stepEvents.clear();
     _otherEvents.clear();
-    _syncLeftEvents.clear();
-    _syncRightEvents.clear();
-
-    _sensorsReady = null;
   }
 
   /// Get all log files in the documents directory
@@ -310,15 +238,6 @@ class ExperimentLogger extends ChangeNotifier{
       await file.delete();
     }
  }
-
-  void _checkReady() {
-    if (_syncLeftEvents.isNotEmpty &&
-        _syncRightEvents.isNotEmpty &&
-        _sensorsReady != null &&
-        !_sensorsReady!.isCompleted) {
-      _sensorsReady!.complete();
-    }
-  }
 
   Future<void> clearAppDocumentsDirectory() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -405,8 +324,8 @@ class ExperimentLogger extends ChangeNotifier{
             '$sessionId,'
             '$repetition,'
             '${time.toIso8601String()},'
-            '$width'
-            '$height'
+            '$width,'
+            '$height,'
             '${boundingBoxToString(face.boundingBox)},'
             '${faceMeshToString(face.mesh!)}';
 
@@ -428,7 +347,7 @@ class ExperimentLogger extends ChangeNotifier{
       for (int i = 0; i < faces.length; i++) {
         header.add("Point $i x;y;z");
       }
-      file.writeAsString(header.join(","));
+      await file.writeAsString(header.join(","));
     }
     // append correctly
     final sink = file.openWrite(mode: FileMode.append);

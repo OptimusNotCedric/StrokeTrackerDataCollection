@@ -12,9 +12,9 @@ import 'package:share_plus/share_plus.dart';
 class CameraMeasuringScreen extends StatefulWidget {
   final int repetitions;
   final int currentRepetition;
-  final VoidCallback onNext;  
-  final VoidCallback startMeasuring;
-  final VoidCallback stopMeasuring;
+  final Future<void> Function() onNext;  
+  final Future<void> Function() startMeasuring;
+  final Future<void> Function() stopMeasuring;
   final FaceDetectorIsolate faceDetector;
   final ExperimentLogger logger;
   final String recordingId;
@@ -79,16 +79,18 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
   }
 
   Future<void> _startVideoRecording() async {
-    setState(() {
-      recording = true;
-    });
-    _startTimer();
+    if (_initializeControllerFuture != null) {
+      await _initializeControllerFuture;
+    }
+    print("started measurement camera");
+    await widget.startMeasuring();
     DateTime lastLoggedTime = DateTime.now().subtract(Duration(seconds: 1));
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       debugPrint("Kamera nicht bereit für Aufnahme.");
       return;
     }
-    widget.startMeasuring();
+    
+    print("stopped measuring");
     try {
       await _cameraController!.startImageStream(
         (CameraImage image) async{
@@ -127,9 +129,13 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
         "Smiling Task",
         "Video_Record_Start",
       );
-
+      setState(() {
+        recording = true;
+      });
+      _startTimer();
       debugPrint("Videoaufnahme gestartet.");
     } catch (e) {
+      widget.stopMeasuring();
       debugPrint("Fehler beim Starten der Videoaufnahme: $e");
     }
   }
@@ -192,6 +198,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
     setState(() {
       recording = false;
     });
+    widget.stopMeasuring();
     _timer?.cancel();
     
     if (_cameraController == null) {
@@ -211,18 +218,16 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
       debugPrint("Fehler beim Stoppen der Videoaufnahme: $e");
     }
     await flushBuffer();
-    finishTask();
+    await widget.onNext();
   }
 
-  void finishTask(){
-    widget.onNext();
-  }
 
   @override
   void dispose() {
     if (_cameraController?.value.isStreamingImages ?? false) {
       _cameraController!.stopImageStream();
     }
+    widget.stopMeasuring();
     _timer?.cancel();
     _cameraController?.dispose();
     super.dispose();

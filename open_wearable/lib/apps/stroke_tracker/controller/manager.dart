@@ -56,6 +56,7 @@ class ExperimentManager {
   }
 
   Future<void> setSensorLogFilePrefix(String prefix) async {
+    
     if (leftWearable is! EdgeRecorderManager) {
       throw Exception(
         "The left wearable does not support setting a log file prefix",
@@ -67,8 +68,8 @@ class ExperimentManager {
       );
     }
     await Future.wait([
-      (leftWearable as EdgeRecorderManager).setFilePrefix("left_$prefix"),
-      (rightWearable as EdgeRecorderManager).setFilePrefix("right_$prefix"),
+      (leftWearable as EdgeRecorderManager).setFilePrefix("L$prefix"),
+      (rightWearable as EdgeRecorderManager).setFilePrefix("R$prefix"),
     ]);
   }
 
@@ -103,7 +104,6 @@ class ExperimentManager {
   ) {
     if (sensorId != null && sensorIdToConfigMap.containsKey(sensorId)) {
       final cfg = sensorIdToConfigMap[sensorId]!;
-      print("Started ConfigProvider");
       if (cfg is SensorFrequencyConfiguration) {
         List<SensorConfigurationValue> values =
             cfgProvider.getSensorConfigurationValues(cfg, distinct: true);
@@ -127,13 +127,7 @@ class ExperimentManager {
             cfg,
             RecordSensorConfigOption(),
           );
-        }
-        if (sensorId == "Skin Temperature Sensor" &&
-            cfg.availableOptions.contains(StreamSensorConfigOption())) {
-          cfgProvider.addSensorConfigurationOption(
-            cfg,
-            StreamSensorConfigOption(),
-          );
+          print("record_Option activated${cfg.name}");
         }
       }
     }
@@ -163,7 +157,7 @@ class ExperimentManager {
         "The right wearable does not support sensor configuration",
       );
     }
-    print("Started ConfigureSensor");
+
     // Configure each sensor according to the global configuration
     for (var sensorConfig in expConfig.globalSensorConfigs) {
       final sensorName = sensorConfig.sensor.toLowerCase();
@@ -183,41 +177,7 @@ class ExperimentManager {
         _rightSensorIdToCfgMap,
         sensorConfig,
       );
-
-      if (leftWearable is SensorManager) {
-        List<Sensor> sensors = (leftWearable as SensorManager).sensors;
-        for (var sensor in sensors) {
-          if (sensor.sensorName == "OPTICAL_TEMPERATURE_SENSOR") {
-            _leftSubscription = sensor.sensorStream.listen(
-              (SensorValue value) => logger.logSyncLeftEvent(value.timestamp),
-              onDone: () async => await _leftSubscription?.cancel(),
-              onError: (error) async {
-                print('Right streaming error: $error');
-                await _leftSubscription?.cancel();
-              },
-            );
-          }
-        }
-      }
-
-      if (rightWearable is SensorManager) {
-        List<Sensor> sensors = (rightWearable as SensorManager).sensors;
-        for (var sensor in sensors) {
-          print("Sensorname: ${sensor.sensorName}");
-          if (sensor.sensorName == "OPTICAL_TEMPERATURE_SENSOR") {
-            _rightSubscription = sensor.sensorStream.listen(
-              (SensorValue value) => logger.logSyncRightEvent(value.timestamp),
-              onDone: () async => await _rightSubscription?.cancel(),
-              onError: (error) async {
-                print('Right streaming error: $error');
-                await _rightSubscription?.cancel();
-              },
-            );
-          }
-        }
-      }
     }
-
     var leftSelectedCfgs = leftSensorCfgProvider.getSelectedConfigurations();
     for (var entry in leftSelectedCfgs) {
       SensorConfiguration config = entry.$1;

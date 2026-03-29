@@ -101,23 +101,26 @@ class _StudyRunnerState extends State<StudyRunner> {
     );
   }
 
+
+
   Future<void> _startMeasuring() async {
     //await _manager.deactivateSensors(); // <-- wichtig
     final step = _steps[_currentIndex];
-    final date = DateTime.now().toIso8601String().replaceAll(':', '-');
+
+    // final date = DateTime.now().toIso8601String().replaceAll(':', '-');
     final filename = "$_repetitionCounter";
 
-    final recordingId =
-        "${widget.protocol.sessionId}_step${filename}_${step.heading.replaceAll(" ", "")}_$date";
+    final recordingId = 
+        "${widget.protocol.sessionId.replaceAll(':', '-')}_rep_${_repetitionCounter}_Step_${_currentIndex}_";
 
 
     await _logger.startLogging(false, widget.protocol.sessionId);
     _logger.logTaskStart(_currentIndex, step.heading);
 
+    print("startSensorLogFilePrefix");
     await _manager.setSensorLogFilePrefix(recordingId);
+    print("startConfigureSensors");
     await _manager.configureSensors();
-    await _logger.sensorsReady;
-
     print("Sensoren gestartet");
   }
 

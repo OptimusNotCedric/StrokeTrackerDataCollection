@@ -6,9 +6,9 @@ import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 class MeasuringScreen extends StatefulWidget {
   final int repetitions;
   final int currentRepetition;
-  final VoidCallback onNext;  
-  final VoidCallback startMeasuring;
-  final VoidCallback stopMeasuring;
+  final Future<void> Function() onNext;  
+  final Future<void> Function() startMeasuring;
+  final Future<void> Function() stopMeasuring;
   final ExperimentLogger logger;
   final String recordingId;
   final String taskName;
@@ -43,12 +43,10 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   }
 
   Future<void> _startRecording() async {
-    setState(() {
-      recording = true;
-    });
-    _startTimer();
     
-    widget.startMeasuring();
+    
+    
+    await widget.startMeasuring();
     try {
 
       widget.logger.logOtherEvent(
@@ -57,7 +55,10 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
         widget.taskName,
         "Recording_Start",
       );
-
+      setState(() {
+        recording = true;
+      });
+      _startTimer();
       debugPrint("MEasurement gestartet.");
     } catch (e) {
       debugPrint("Fehler beim Starten der Measurement: $e");
@@ -69,6 +70,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       return;
     }
     
+    widget.stopMeasuring();
     setState(() {
       recording = false;
     });
@@ -94,6 +96,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
   @override
   void dispose() {
+    widget.stopMeasuring();
     _timer?.cancel();
     super.dispose();
   }

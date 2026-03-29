@@ -20,8 +20,9 @@ class InstructionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     
-
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+    child: Scaffold(
       body: Stack(
         children: [
           Padding(
@@ -111,6 +112,6 @@ class InstructionScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }
