@@ -10,7 +10,8 @@ class StrokeTrackerView extends StatelessWidget {
     return SelectTwoEarableView(
       startApp: (leftWearable, leftConfigProv, rightWearable, rightConfigProv) {
         // Diese Ansicht startet, nachdem die Kopfhörer ausgewählt wurden.
-        return StudySelection(
+        return
+         StudySelection(
           leftWearable: leftWearable,
           leftConfigProvider: leftConfigProv,
           rightWearable: rightWearable,

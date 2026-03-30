@@ -34,13 +34,6 @@ class _StudySelectionState extends State<StudySelection> {
   void _submitParticipantId() {
     String inputString = _controller.text.trim();
     String participantId = inputString.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
-    if (participantId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Bitte eine participant-ID eingeben!')),
-      );
-      return;
-    }
-
     StudyProtocol protocol = StudyProtocol();
     
     protocol.addParticipantId(participantId);
@@ -62,6 +55,7 @@ class _StudySelectionState extends State<StudySelection> {
   
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('Submit Your ID'),

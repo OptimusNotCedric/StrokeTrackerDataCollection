@@ -1,4 +1,5 @@
 
+import 'package:flutter/material.dart';
 /// Represents a sensor configuration
 class SensorConfig {
   final String sensor;
@@ -36,4 +37,20 @@ class ExperimentConfig {
     return sensorIdMap[normalizedName];
   }
 
+}
+
+
+class LanguageProvider extends ChangeNotifier {
+  static bool isGerman = false;
+
+  LanguageProvider();
+
+  void toggle() {
+    isGerman = !isGerman;
+    notifyListeners();
+  }
+
+  String t(String en, String de) {
+    return isGerman ? de : en;
+  }
 }

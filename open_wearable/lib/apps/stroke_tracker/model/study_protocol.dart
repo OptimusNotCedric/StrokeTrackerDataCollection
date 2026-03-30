@@ -40,8 +40,30 @@ class StudyProtocol {
       ),
     StudyStep(
       type: StudyStepType.measuring,
-      measuringInstructions: ["Instruct the patient to tap both earables at the same time"],
-      repetitions: 3,
+      measuringInstructions: ["Instruct the patient to tap the right Earable with the left Hand"],
+      repetitions: 1,
+    ),
+    StudyStep(
+      type: StudyStepType.measuring,
+      measuringInstructions: ["Instruct the patient to tap the left Earable with the right Hand"],
+      repetitions: 1,
+    ),
+    StudyStep(
+      type: StudyStepType.measuring,
+      measuringInstructions: ["Instruct the patient to tap the right Earable with the left Hand"],
+      repetitions: 1,
+    ),StudyStep(
+      type: StudyStepType.measuring,
+      measuringInstructions: ["Instruct the patient to tap the left Earable with the right Hand"],
+      repetitions: 1,
+    ),StudyStep(
+      type: StudyStepType.measuring,
+      measuringInstructions: ["Instruct the patient to tap the right Earable with the left Hand"],
+      repetitions: 1,
+    ),StudyStep(
+      type: StudyStepType.measuring,
+      measuringInstructions: ["Instruct the patient to tap the left Earable with the right Hand"],
+      repetitions: 1,
     ),
     StudyStep(type: StudyStepType.ending),
     ];

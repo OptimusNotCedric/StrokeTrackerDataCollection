@@ -65,6 +65,34 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     }
   }
 
+    Future<bool?> _showSaveDialog() async {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Save Measurement?"),
+          content: const Text(
+            "Do you want to save this measurement or repeat it?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text("Remeasure"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
   Future<void> _stopRecording() async {
     if (!recording) {
       return;
@@ -87,11 +115,18 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     } catch (e) {
       debugPrint("Fehler beim Stoppen der Videoaufnahme: $e");
     }
-    finishTask();
-  }
+    final shouldSave = await _showSaveDialog();
 
-  void finishTask(){
-    widget.onNext();
+    if (shouldSave == true) {
+      
+      await widget.onNext();
+    } else {
+      // discard data and reset
+      setState(() {
+        countdown = 10;
+      });
+
+      debugPrint("Measurement discarded. Ready to remeasure.");}
   }
 
   @override
