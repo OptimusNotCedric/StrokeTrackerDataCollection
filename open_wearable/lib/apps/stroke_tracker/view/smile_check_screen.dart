@@ -1,13 +1,12 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:face_detection_tflite/face_detection_tflite.dart';
-import 'package:path_provider/path_provider.dart';
+//import 'package:path_provider/path_provider.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
-import 'package:share_plus/share_plus.dart';
+//import 'package:share_plus/share_plus.dart';
 
 class CameraMeasuringScreen extends StatefulWidget {
   final int repetitions;
@@ -139,7 +138,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
       debugPrint("Fehler beim Starten der Videoaufnahme: $e");
     }
   }
-
+  /*
   Future<void> _saveDebugMeshImage(cv.Mat mat, Face face) async {
     try {
       final box = face.boundingBox;
@@ -189,7 +188,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
       print("Error saving debug image: $e");
     }
   }
-
+  */
   Future<void> _stopVideoRecording() async {
     if (!recording) {
       return;
@@ -312,7 +311,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
                 y,
                 image.planes[0].bytes[index],
                 image.planes[1].bytes[uvIndex],
-                image.planes[1].bytes[uvIndex + 1]);
+                image.planes[1].bytes[uvIndex + 1],);
           }
         }
       } else if (image.planes.length >= 3) {
@@ -326,7 +325,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
                 uvPixelStride * (x ~/ 2) + uvRowStride * (y ~/ 2);
             final int index = y * yRowStride + x * yPixelStride;
             writePixel(x, y, image.planes[0].bytes[index],
-                image.planes[1].bytes[uvIndex], image.planes[2].bytes[uvIndex]);
+                image.planes[1].bytes[uvIndex], image.planes[2].bytes[uvIndex],);
           }
         }
       } else {
@@ -511,7 +510,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
                     ),
                   ),
               
-            ]
-      )));
+            ],
+      ),),);
   }
 }

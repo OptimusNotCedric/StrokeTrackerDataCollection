@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
-
 
 class InstructionScreen extends StatelessWidget {
   final String heading;

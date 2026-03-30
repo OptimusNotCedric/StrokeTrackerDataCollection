@@ -52,7 +52,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       widget.logger.logOtherEvent(
         widget.repetitions,
         "Start Record of ${widget.taskName}",
-        widget.taskName,
+        widget.instruction,
         "Recording_Start",
       );
       setState(() {
@@ -81,7 +81,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       widget.logger.logOtherEvent(
         widget.repetitions,
         "Stop Record of ${widget.taskName}",
-        widget.taskName,
+        widget.instruction,
         "Recording_Stop",
       );
     } catch (e) {

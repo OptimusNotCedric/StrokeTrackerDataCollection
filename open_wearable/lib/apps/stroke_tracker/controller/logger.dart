@@ -54,9 +54,9 @@ class OtherEvent {
     required this.eventType,
   });
 
-  List<String> toCsvRow(String SessionID) {
+  List<String> toCsvRow(String sessionID) {
     return [
-      SessionID,
+      sessionID,
       blockNumber.toString(),
       instruction,
       taskId,
@@ -93,8 +93,6 @@ class ExperimentLogger extends ChangeNotifier{
       'SessionID,Block,Task,DurationS,StartTime,EndTime,RelativeStartMS,RelativeEndMS';
   static const String _otherCsvHeader =
       'SessionID,Block,Task,Time,RelativeTimeMS,EventType,Value';
-  static const String _syncCsvHeader =
-      "SessionID,DeviceTimestamp,PhoneTimestamp,RelativePhoneTimeMS";
 
   late File _stepsCsvFile;
   late File _otherCsvFile;
@@ -181,13 +179,6 @@ class ExperimentLogger extends ChangeNotifier{
     print("Finalizing experiment");
 
     final converter = ListToCsvConverter();
-
-    final syncLeftRows = <List<String>>[];
-
-    final syncRightRows = <List<String>>[];
-
-    final syncLeftCsvData = converter.convert(syncLeftRows);
-    final syncRightCsvData = converter.convert(syncRightRows);
 
     if (!sync) {
       final stepsRows = <List<String>>[];

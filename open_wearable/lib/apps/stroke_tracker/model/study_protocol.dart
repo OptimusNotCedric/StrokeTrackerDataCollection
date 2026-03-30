@@ -36,10 +36,11 @@ class StudyProtocol {
     StudyStep(
       type: StudyStepType.instruction,
       heading: "Tap Earables",
-      description: "During the recording Tap both earables"
+      description: "During the recording Tap both earables",
       ),
     StudyStep(
       type: StudyStepType.measuring,
+      measuringInstructions: ["Instruct the patient to tap both earables at the same time"],
       repetitions: 3,
     ),
     StudyStep(type: StudyStepType.ending),

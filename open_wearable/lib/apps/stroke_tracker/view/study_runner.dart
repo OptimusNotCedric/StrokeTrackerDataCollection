@@ -84,9 +84,9 @@ class _StudyRunnerState extends State<StudyRunner> {
       SensorConfig(sensor: "imu", sampleRate: 50),
       SensorConfig(sensor: "pressure", sampleRate: 50),
       SensorConfig(sensor: "microphone", sampleRate: 48000),
-      SensorConfig(sensor: "ppg", sampleRate: 50),
-      SensorConfig(sensor: "bone_conduction", sampleRate: 1600),
-      SensorConfig(sensor: "temperature", sampleRate: 8),
+      //SensorConfig(sensor: "ppg", sampleRate: 50),
+      //SensorConfig(sensor: "bone_conduction", sampleRate: 1600),
+      //SensorConfig(sensor: "temperature", sampleRate: 8),
     ];
 
     _expConfig = ExperimentConfig(globalSensorConfigs: sensorConfigs); 
@@ -108,8 +108,6 @@ class _StudyRunnerState extends State<StudyRunner> {
     final step = _steps[_currentIndex];
 
     // final date = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final filename = "$_repetitionCounter";
-
     final recordingId = 
         "${widget.protocol.sessionId.replaceAll(':', '-')}_rep_${_repetitionCounter}_Step_${_currentIndex}_";
 
@@ -256,7 +254,7 @@ class _StudyRunnerState extends State<StudyRunner> {
             logger: _logger, 
             recordingId: widget.protocol.sessionId, 
             taskName: step.heading, 
-            instruction: step.measuringInstructions[step.instructionOrder[_repetitionCounter-1]]);
+            instruction: step.measuringInstructions[step.instructionOrder[_repetitionCounter-1]],);
         }
         return PlatformScaffold(
             appBar: PlatformAppBar(title: Text("Fehler")),

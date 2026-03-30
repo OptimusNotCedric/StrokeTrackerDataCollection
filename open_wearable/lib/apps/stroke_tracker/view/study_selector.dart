@@ -5,14 +5,9 @@ import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_protocol.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/demographics_survey.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/download_page.dart';
-import 'package:open_wearable/apps/stroke_tracker/view/end_page.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 import 'package:provider/provider.dart';
-import 'study_runner.dart';
 
-import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 
 
 class StudySelection extends StatefulWidget {
@@ -22,7 +17,7 @@ class StudySelection extends StatefulWidget {
   final SensorConfigurationProvider leftConfigProvider;
   final SensorConfigurationProvider rightConfigProvider;
 
-  const StudySelection({
+  const StudySelection({super.key, 
     required this.leftWearable,
     required this.rightWearable,
     required this.leftConfigProvider,

@@ -176,7 +176,6 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
     results["gender"] = genderChoice.toString().split(".")[1];
     results["predispositions"] = predispotionsController.text;
 
-    final prefix = "${widget.protocol.participantId}_${widget.protocol.sessionId}_";
     await _logger.startLogging(false, widget.protocol.sessionId);
 
     for (var entry in results.entries) {
