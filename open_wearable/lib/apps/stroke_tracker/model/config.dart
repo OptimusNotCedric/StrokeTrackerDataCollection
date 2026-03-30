@@ -45,9 +45,8 @@ class LanguageProvider extends ChangeNotifier {
 
   LanguageProvider();
 
-  void toggle() {
+  static void toggle() {
     isGerman = !isGerman;
-    notifyListeners();
   }
 
   String t(String en, String de) {
