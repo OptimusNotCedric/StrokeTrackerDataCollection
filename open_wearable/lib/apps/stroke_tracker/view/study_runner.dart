@@ -85,7 +85,7 @@ class _StudyRunnerState extends State<StudyRunner> {
       SensorConfig(sensor: "pressure", sampleRate: 50),
       SensorConfig(sensor: "microphone", sampleRate: 48000),
       //SensorConfig(sensor: "ppg", sampleRate: 50),
-      //SensorConfig(sensor: "bone_conduction", sampleRate: 1600),
+      SensorConfig(sensor: "bone_conduction", sampleRate: 1600),
       //SensorConfig(sensor: "temperature", sampleRate: 8),
     ];
 
@@ -139,7 +139,10 @@ class _StudyRunnerState extends State<StudyRunner> {
       currentRepetition: _repetitionCounter, 
       logger: _logger, 
       currentStepNumber: _currentIndex,
-      currentStepTask: _steps[_currentIndex].heading,),
+      currentStepTask: _steps[_currentIndex].heading,
+      translate: widget.protocol.t,
+      ),
+      
     ),
     );
     setState(() {
@@ -224,6 +227,7 @@ class _StudyRunnerState extends State<StudyRunner> {
             description: step.description,
             onNext: _nextStep,
             onLeaveStudy: _leaveStudy,
+            t: widget.protocol.t,
           );
         }
 
@@ -237,6 +241,7 @@ class _StudyRunnerState extends State<StudyRunner> {
             logger: _logger,
             faceDetector: _faceDetectorIsolate,
             recordingId: widget.protocol.sessionId,
+            t: widget.protocol.t,
             );
         }
 
@@ -254,7 +259,9 @@ class _StudyRunnerState extends State<StudyRunner> {
             logger: _logger, 
             recordingId: widget.protocol.sessionId, 
             taskName: step.heading, 
-            instruction: step.measuringInstructions[step.instructionOrder[_repetitionCounter-1]],);
+            instruction: step.measuringInstructions[step.instructionOrder[_repetitionCounter-1]],
+            t: widget.protocol.t,
+            );
         }
         return PlatformScaffold(
             appBar: PlatformAppBar(title: Text("Fehler")),

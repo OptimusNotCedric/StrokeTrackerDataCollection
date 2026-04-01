@@ -14,6 +14,7 @@ class CameraMeasuringScreen extends StatefulWidget {
   final Future<void> Function() onNext;  
   final Future<void> Function() startMeasuring;
   final Future<void> Function() stopMeasuring;
+  final String Function(String en,String de) t;
   final FaceDetectorIsolate faceDetector;
   final ExperimentLogger logger;
   final String recordingId;
@@ -29,6 +30,7 @@ class CameraMeasuringScreen extends StatefulWidget {
     required this.faceDetector,
     required this.logger,
     required this.recordingId,
+    required this.t,
   });
 
   @override
@@ -41,6 +43,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
   bool debugimagesaved = false;
   bool recording = false;
   List<(DateTime, Face,int, int)> faceBuffer = [];
+  late final String Function(String en,String de) t;
 
   CameraLensDirection cameraLensDirection = CameraLensDirection.back;
 
@@ -52,6 +55,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
   @override
   void initState() {
     super.initState();
+    t = widget.t;
     _initCamera();
   }
 
@@ -195,21 +199,24 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Save Measurement?"),
-          content: const Text(
+          title: Text(t("Save Measurement?", "Messung speichern?")),
+          content: Text(
+            t(
             "Do you want to save this measurement or repeat it?",
+            "Möchten Sie diese Messung speichern oder wiederholen?"
+          ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text("Remeasure"),
+              child: Text(t("Remeasure", "Wiederholen")),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop(true);
 
               },
-              child: const Text("Save"),
+              child: Text(t("Save", "Speichern")),
             ),
           ],
         );
@@ -487,7 +494,10 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
                 child: Align(
                   alignment: AlignmentGeometry.topCenter,
                   child: Text(
-                    "Align the face inside the frame and give instruction to smile after pressing the button",
+                    t(
+                      "Align the face inside the frame and give instruction to smile after pressing the button",
+                      "Richten Sie das Gesicht im Rahmen aus und geben Sie die Anweisung zu lächeln, nachdem Sie den Button gedrückt haben"
+                    ),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),

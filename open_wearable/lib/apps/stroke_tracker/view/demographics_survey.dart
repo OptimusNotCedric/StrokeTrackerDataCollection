@@ -26,6 +26,7 @@ class DemographicsSurvey extends StatefulWidget {
   final Wearable rightWearable;
   final SensorConfigurationProvider leftConfigProvider;
   final SensorConfigurationProvider rightConfigProvider;
+  
 
   const DemographicsSurvey({
     super.key,
@@ -46,20 +47,22 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
   late final ExperimentLogger _logger;
   int age = -1;
   Gender? genderChoice;
-  
+  late final String Function(String en,String de) t;
+
   @override
   void initState() {
     super.initState();
     _logger = Provider.of<ExperimentLogger>(context, listen: false);
+    t = widget.protocol.t;
   }
 
   @override
   Widget build(BuildContext context){
     
     return PopScope(
-      canPop: false,
+      canPop: true,
       child: PlatformScaffold(
-      appBar: PlatformAppBar(title: PlatformText("Fill out the Survey"),),
+      appBar: PlatformAppBar(title: PlatformText(t("Fill out the Survey", "Fragebogen ausfüllen")),),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(10),
         child: Column(
@@ -71,12 +74,12 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "How old are you?",
+                    t("How old are you?", "Wie alt sind Sie?"),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "Please enter your age in years",
+                    t("Please enter your age in years", "Bitte geben Sie Ihr Alter in Jahren ein"),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   SizedBox(height: 12),
@@ -84,11 +87,11 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
                     controller: ageInputController,
                     keyboardType: TextInputType.number,
                     onChanged: (value) => setState(() {
-                      age = int.parse(value);
+                      age = int.tryParse(value) ?? 0;
                     }),
                     decoration: InputDecoration(
-                      labelText: "Age",
-                      suffixText: "years",
+                      labelText: t("Age", "Alter"),
+                      suffixText: t("years", "Jahre"),
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -110,16 +113,16 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "What is your biological gender?",
+                      t("What is your biological gender?", "Was ist Ihr biologisches Geschlecht?"),
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     SizedBox(height: 12),
                     RadioListTile<Gender>(
-                      title: Text("Male"),
+                      title: Text(t("Male", "Männlich")),
                       value: Gender.male,
                     ),
                     RadioListTile<Gender>(
-                      title: Text("Female"),
+                      title: Text(t("Female", "Weiblich")),
                       value: Gender.female,
                     ),
                   ],
@@ -134,7 +137,10 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Do you have any predispositions that could impede this study?",
+                    t(
+                      "Do you have any predispositions that could impede this study?",
+                      "Haben Sie Vorerkrankungen, die diese Studie beeinträchtigen könnten?"
+                    ),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   SizedBox(height: 8),
@@ -149,7 +155,7 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
             ),
           ),
           Padding(padding: EdgeInsetsGeometry.fromLTRB(5, 10, 5, 10),
-          child: ElevatedButton(onPressed: _isFilledOut()?_continueButtonPressed:null, child: const Text("Continue")),)
+          child: ElevatedButton(onPressed: _isFilledOut()?_continueButtonPressed:null, child: Text(t("Continue", "Weiter"))),)
         ],
         
       ),

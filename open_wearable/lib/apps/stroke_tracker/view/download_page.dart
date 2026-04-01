@@ -5,7 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 class DownloadScreen extends StatefulWidget {
   const DownloadScreen({super.key});
-
+  
   @override
   State<DownloadScreen> createState() => _DownloadScreenState();
 }

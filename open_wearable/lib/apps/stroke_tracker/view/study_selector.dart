@@ -30,11 +30,13 @@ class StudySelection extends StatefulWidget {
 
 class _StudySelectionState extends State<StudySelection> {
   final TextEditingController _controller = TextEditingController();
+  bool isEnglish = false;
 
   void _submitParticipantId() {
     String inputString = _controller.text.trim();
     String participantId = inputString.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
     StudyProtocol protocol = StudyProtocol();
+    protocol.isEnglish = isEnglish;
     
     protocol.addParticipantId(participantId);
     protocol.addSessionId("${DateTime.now().toIso8601String()}");
@@ -60,6 +62,19 @@ class _StudySelectionState extends State<StudySelection> {
       appBar: AppBar(
         title: Text('Submit Your ID'),
         actions: [
+          Row(
+              children: [
+                Text(isEnglish ? 'EN' : 'DE'),
+                Switch(
+                  value: isEnglish,
+                  onChanged: (value) {
+                    setState(() {
+                      isEnglish = value;
+                    });
+                  },
+                ),
+              ],
+            ),
           IconButton(
             icon: Icon(Icons.download),
             onPressed: () {
@@ -80,7 +95,9 @@ class _StudySelectionState extends State<StudySelection> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Enter your Participant ID',
+                isEnglish 
+                  ? 'Enter your Participant ID' 
+                  : 'Teilnehmer-ID eingeben',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
 
@@ -89,9 +106,10 @@ class _StudySelectionState extends State<StudySelection> {
                 controller: _controller,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Participant ID',
+                  labelText: isEnglish ? 'Participant ID' : 'Teilnehmer-ID',
                   
-                  hintText: 'Letters and numbers only',
+                  hintText: isEnglish ? 'Letters and numbers only' 
+                      : 'Nur Buchstaben und Zahlen',
                 ),
               ),
               SizedBox(height: 20),
@@ -102,7 +120,7 @@ class _StudySelectionState extends State<StudySelection> {
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Text(
-                      'Submit',
+                      isEnglish ? 'Submit' : 'Absenden',
                       style: TextStyle(fontSize: 18),
                     ),
                   ),

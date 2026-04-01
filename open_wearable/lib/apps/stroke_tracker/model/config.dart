@@ -16,6 +16,7 @@ class SensorConfig {
 class ExperimentConfig {
  
   final List<SensorConfig> globalSensorConfigs;
+  
 
   ExperimentConfig({
     required this.globalSensorConfigs,

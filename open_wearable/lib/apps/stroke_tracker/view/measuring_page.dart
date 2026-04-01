@@ -9,6 +9,7 @@ class MeasuringScreen extends StatefulWidget {
   final Future<void> Function() onNext;  
   final Future<void> Function() startMeasuring;
   final Future<void> Function() stopMeasuring;
+  final String Function(String en,String de) t;
   final ExperimentLogger logger;
   final String recordingId;
   final String taskName;
@@ -25,6 +26,7 @@ class MeasuringScreen extends StatefulWidget {
     required this.recordingId,
     required this.taskName,
     required this.instruction,
+    required this.t,
   });
 
   @override
@@ -33,13 +35,14 @@ class MeasuringScreen extends StatefulWidget {
 
 class _MeasuringScreenState extends State<MeasuringScreen> {
   bool recording = false;
-
+  late final String Function(String en,String de) t;
   int countdown = 10;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    t = widget.t;
   }
 
   Future<void> _startRecording() async {
@@ -71,21 +74,24 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Save Measurement?"),
-          content: const Text(
-            "Do you want to save this measurement or repeat it?",
+          title: Text(t("Save Measurement?", "Messung speichern?")),
+          content: Text(
+              t(
+              "Do you want to save this measurement or repeat it?",
+              "Möchten Sie diese Messung speichern oder wiederholen?"
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text("Remeasure"),
+              child: Text(t("Remeasure", "Wiederholen")),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop(true);
 
               },
-              child: const Text("Save"),
+              child: Text(t("Save", "Speichern")),
             ),
           ],
         );
@@ -178,7 +184,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                       child: Column(
                         children: [
                           Text(
-                            "Examiner Instruction",
+                            t("Examiner Instruction", "Anweisung für Untersucher"),
                             style: TextStyle(
                               color: Colors.deepOrange,
                               fontSize: 16,
@@ -208,7 +214,10 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                           ),
                           SizedBox(height: 6),
                           Text(
-                            "Look at the camera and follow the instruction",
+                            t(
+                              "Look at the camera and follow the instruction",
+                              "Schauen Sie in die Kamera und folgen Sie der Anweisung"
+                            ),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.grey.shade700,
@@ -240,7 +249,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                 Expanded(
                   child: Center(
                     child: Text(
-                      "Press start to begin",
+                      t("Press start to begin", "Zum Starten drücken"),
                       style: TextStyle(
                         color: Colors.grey.shade600,
                         fontSize: 18,
@@ -256,7 +265,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                   children: [
                     // Status text
                     Text(
-                      recording ? "Recording..." : "Ready",
+                      recording ? t("Recording...", "Aufnahme läuft...") : t("Ready", "Bereit"),
                       style: TextStyle(
                         color: recording ? Colors.red : Colors.grey.shade700,
                         fontSize: 16,
@@ -295,7 +304,10 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
                     // Repetition indicator
                     Text(
-                      "Repetition ${widget.currentRepetition} / ${widget.repetitions}",
+                      t(
+                        "Repetition ${widget.currentRepetition} / ${widget.repetitions}",
+                        "Wiederholung ${widget.currentRepetition} / ${widget.repetitions}"
+                      ),
                       style: TextStyle(
                         color: Colors.grey.shade600,
                         fontSize: 14,

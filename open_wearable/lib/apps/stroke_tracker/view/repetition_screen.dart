@@ -6,7 +6,8 @@ import 'package:provider/provider.dart';
 class LikertChoice extends StatefulWidget{
   final Function(int) onScoreChanged;
   final int initialScore;
-  LikertChoice({super.key, required this.onScoreChanged, required this.initialScore});
+  final String Function(String en,String de) t;
+  LikertChoice({super.key, required this.onScoreChanged, required this.initialScore, required this.t});
 
   @override
   State<LikertChoice> createState() {
@@ -15,13 +16,14 @@ class LikertChoice extends StatefulWidget{
 }
 
 class _LikertChoiceState extends State<LikertChoice> {
-
+  late final String Function(String en,String de) t;
   int score = 0;
 
   @override
   void initState() {
     super.initState();
     score = widget.initialScore;
+    t = widget.t;
   }
 
   @override
@@ -30,23 +32,23 @@ class _LikertChoiceState extends State<LikertChoice> {
       segments: <ButtonSegment<int>>[
         ButtonSegment<int>(
           value: 1,
-          label: Text("Likely absent"),
+          label: Text(t("Likely absent", "Wahrscheinlich nicht vorhanden")),
         ),
         ButtonSegment<int>(
           value: 2,
-          label: Text("Somewhat likely absent"),
+          label: Text(t("Somewhat likely absent", "Eher nicht vorhanden")),
         ),
         ButtonSegment<int>(
           value: 3,
-          label: Text("Indeterminate"),
+          label: Text(t("Indeterminate", "Unklar")),
         ),
         ButtonSegment<int>(
           value: 4,
-          label: Text("Somewhat likely present"),
+          label: Text(t("Somewhat likely present", "Eher vorhanden")),
         ),
         ButtonSegment<int>(
           value: 5,
-          label: Text("Likely present"),
+          label: Text(t("Likely present", "Wahrscheinlich vorhanden")),
         ),
       ],
       selected: <int>{score},
@@ -72,6 +74,7 @@ class TaskScreen extends StatefulWidget{
   final int currentStepNumber;
   final String currentStepTask;
   final ExperimentLogger logger;
+  final String Function(String en,String de) translate;
 
   const TaskScreen({
     super.key,
@@ -80,6 +83,7 @@ class TaskScreen extends StatefulWidget{
     required this.logger,
     required this.currentStepNumber,
     required this.currentStepTask,
+    required this.translate,
   });
 
   @override
@@ -91,11 +95,14 @@ class _TaskScreenState extends State<TaskScreen> {
   int score = 0;
   Side? selectedSide;
   bool wrongSelection = false;
+  late final String Function(String en,String de) t;
 
   @override
   void initState() {
     super.initState();
+    t = widget.translate;
     _likertWidget = _buildLikertScale();
+    
   }
 
   @override
@@ -104,7 +111,7 @@ class _TaskScreenState extends State<TaskScreen> {
       canPop: false,
     child: Scaffold(
       appBar: AppBar(
-        title: const Text("Repetition Task"),
+        title: Text(t("Repetition Task", "Wiederholungsaufgabe")),
         automaticallyImplyLeading: false,
       ),
       body: Center(
@@ -112,14 +119,20 @@ class _TaskScreenState extends State<TaskScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Repetition ${widget.currentRepetition} of ${widget.maxRepetition}",
+              t(
+                "Repetition ${widget.currentRepetition} of ${widget.maxRepetition}",
+                "Wiederholung ${widget.currentRepetition} von ${widget.maxRepetition}"
+              ),
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 30),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                "Please rate the pathology severity on a scale from 1 (no impairment) to 5 (severe impairment).",
+                t(
+                  "Please rate the pathology severity on a scale from 1 (no impairment) to 5 (severe impairment).",
+                  "Bitte bewerten Sie den Schweregrad der Pathologie auf einer Skala von 1 (keine Beeinträchtigung) bis 5 (schwere Beeinträchtigung)."
+                ),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
@@ -136,7 +149,10 @@ class _TaskScreenState extends State<TaskScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 12),
                 child: Text(
-                  "Please complete all required selections",
+                  t(
+                    "Please complete all required selections",
+                    "Bitte treffen Sie alle erforderlichen Auswahlmöglichkeiten"
+                  ),
                   style: TextStyle(
                     color: Colors.red,
                     fontSize: 14,
@@ -149,8 +165,8 @@ class _TaskScreenState extends State<TaskScreen> {
               onPressed: canGoNext() ? pressExitButton : null,
               child: Text(
                 widget.currentRepetition < widget.maxRepetition
-                    ? "Start/Repeat Task"
-                    : "Done",
+                    ? t("Start/Repeat Task", "Starten/Wiederholen")
+                    : t("Done", "Fertig"),
               ),
             ),
           ],
@@ -161,7 +177,7 @@ class _TaskScreenState extends State<TaskScreen> {
 
   Widget _buildLikertScale(){
 
-    return LikertChoice(onScoreChanged: onScoreChanged, initialScore: 0);
+    return LikertChoice(onScoreChanged: onScoreChanged, initialScore: 0, t: widget.translate,);
   }
 
   void onScoreChanged(int newScore) {
@@ -180,25 +196,28 @@ class _TaskScreenState extends State<TaskScreen> {
     return Column(
       children: [
         const SizedBox(height: 20),
-        const Text(
+        Text(
+                t(
           "Which side is the impairment (From perspective of the patient)?",
+          "Welche Seite ist betroffen (aus Sicht des Patienten)?"
+        ),
           style: TextStyle(fontSize: 18),
         ),
         const SizedBox(height: 10),
 
         SegmentedButton<Side>(
-          segments: const <ButtonSegment<Side>>[
+          segments: <ButtonSegment<Side>>[
             ButtonSegment(
               value: Side.left,
-              label: Text("Left"),
+              label: Text(t("Left", "Links")),
               icon: Icon(Icons.arrow_left),
             ),
             ButtonSegment(
               value: Side.right,
               label: Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Text("Right"),
+              children: [
+                Text(t("Right", "Rechts")),
                 SizedBox(width: 4),
                 Icon(Icons.arrow_right),
               ],

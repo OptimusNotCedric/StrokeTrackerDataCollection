@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class InstructionScreen extends StatelessWidget {
   final String heading;
   final String description;
-  
+  final String Function(String en,String de) t;
   final VoidCallback onNext;
   final VoidCallback onLeaveStudy;
 
@@ -13,6 +13,7 @@ class InstructionScreen extends StatelessWidget {
     required this.description,
     required this.onNext,
     required this.onLeaveStudy,
+    required this.t,
   });
 
   @override
@@ -49,8 +50,8 @@ class InstructionScreen extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Task:',
+                            Text(
+                              t("Task:", "Aufgabe:"),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -96,8 +97,8 @@ class InstructionScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      "Continue",
+                    child: Text(
+                      t("Continue", "Weiter"),
                       style: TextStyle(fontSize: 18),
                     ),
                   ),
