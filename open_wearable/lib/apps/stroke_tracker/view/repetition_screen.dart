@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
-import 'package:open_wearable/apps/stroke_tracker/model/config.dart';
-import 'package:provider/provider.dart';
 
 class LikertChoice extends StatefulWidget{
   final Function(int) onScoreChanged;
