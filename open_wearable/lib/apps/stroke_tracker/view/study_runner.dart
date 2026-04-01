@@ -23,8 +23,8 @@ import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 class StudyRunner extends StatefulWidget {
   final StudyProtocol protocol;
   final ExperimentLogger logger;
-  final Wearable leftWearable;
-  final Wearable rightWearable;
+  final OpenEarableV2 leftWearable;
+  final OpenEarableV2 rightWearable;
   final SensorConfigurationProvider leftConfigProvider;
   final SensorConfigurationProvider rightConfigProvider;
 
@@ -106,11 +106,9 @@ class _StudyRunnerState extends State<StudyRunner> {
   Future<void> _startMeasuring() async {
     //await _manager.deactivateSensors(); // <-- wichtig
     final step = _steps[_currentIndex];
-
     // final date = DateTime.now().toIso8601String().replaceAll(':', '-');
     final recordingId = 
         "${widget.protocol.sessionId.replaceAll(':', '-')}_rep_${_repetitionCounter}_Step_${_currentIndex}_";
-
 
     await _logger.startLogging(false, widget.protocol.sessionId);
     _logger.logTaskStart(_currentIndex, step.heading);
@@ -137,7 +135,8 @@ class _StudyRunnerState extends State<StudyRunner> {
     builder: (context) => TaskScreen(
       maxRepetition: maxRepetitions, 
       currentRepetition: _repetitionCounter, 
-      logger: _logger, 
+      logger: _logger,
+      onLeaveStudy: _leaveStudy,
       currentStepNumber: _currentIndex,
       currentStepTask: _steps[_currentIndex].heading,
       translate: widget.protocol.t,

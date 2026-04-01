@@ -1,79 +1,147 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 import 'package:open_wearable/view_models/wearables_provider.dart';
 import 'package:provider/provider.dart';
 
-class SelectEarableView  extends StatefulWidget {
-  /// Callback to start the app
-  /// -- [wearable] the selected wearable
-  /// returns a [Widget] of the home page of the app
-  final Widget Function(Wearable, SensorConfigurationProvider) startApp;
+class SelectEarableView extends StatelessWidget {
+  final Widget Function(
+    OpenEarableV2 right,
+    SensorConfigurationProvider rightConfig,
+    OpenEarableV2 left,
+    SensorConfigurationProvider leftConfig,
+  ) startApp;
 
   const SelectEarableView({super.key, required this.startApp});
 
   @override
-  State<SelectEarableView> createState() => _SelectEarableViewState();
-}
-
-class _SelectEarableViewState extends State<SelectEarableView> {
-  Wearable? _selectedWearable;
-
-  @override
   Widget build(BuildContext context) {
-    return PlatformScaffold(
-      appBar: PlatformAppBar(
-        title: PlatformText("Select Earable"),
-      ),
-      body: Consumer(
-        builder: (context, WearablesProvider wearablesProvider, child) =>
-          Column(
-            children: [
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: wearablesProvider.wearables.length,
-                itemBuilder: (context, index) {
-                  Wearable wearable = wearablesProvider.wearables[index];
-                  return PlatformListTile(
-                    title: PlatformText(wearable.name),
-                    subtitle: PlatformText(wearable.deviceId), //TODO: use device ID
-                    trailing: _selectedWearable == wearable
-                        ? Icon(Icons.check)
-                        : null,
-                    onTap: () => setState(() {
-                      _selectedWearable = wearable;
-                    }),
-                  );
-                },
-              ),
+    final prov = context.watch<WearablesProvider>();
 
-              PlatformElevatedButton(
-                child: PlatformText("Start App"),
-                onPressed: () {
-                  if (_selectedWearable != null) {
-                    Navigator.push(
-                      context,
-                      platformPageRoute(
-                        context: context,
-                        builder: (context) {
-                          return ChangeNotifierProvider.value(
-                            value: wearablesProvider.getSensorConfigurationProvider(_selectedWearable!),
-                            child: widget.startApp(
-                              _selectedWearable!, 
-                              wearablesProvider.getSensorConfigurationProvider(_selectedWearable!),
-                            ),
-                          );
-                        },
+    final wearables = prov.wearables.whereType<OpenEarableV2>().toList();
+    _logWearables(wearables);
+    return FutureBuilder<_EarablePair>(
+      future: _resolveEarables(wearables),
+      builder: (context, snapshot) {
+        
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        
+        if (snapshot.hasError) {
+          return const Scaffold(
+            body: Center(child: Text("Error detecting earables")),
+          );
+        }
+
+        final pair = snapshot.data!;
+        final left = pair.left;
+        final right = pair.right;
+
+        final hasLeft = left != null;
+        final hasRight = right != null;
+        final bothConnected = hasLeft && hasRight;
+
+        
+        if (!bothConnected) {
+          return Scaffold(
+            appBar: AppBar(title: const Text("Select Earables")),
+            body: Center(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  border: Border.all(color: Colors.red),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.warning, color: Colors.red, size: 40),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Missing earables",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
                       ),
-                    );
-                  }
-                },
+                    ),
+                    const SizedBox(height: 10),
+                    Text(_buildMissingText(hasLeft, hasRight)),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Please connect both left and right earables.",
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-      ),
+            ),
+          );
+        }
+
+        // ✅ BOTH CONNECTED → START APP
+        return startApp(
+          right!,
+          prov.getSensorConfigurationProvider(right),
+          left!,
+          prov.getSensorConfigurationProvider(left),
+        );
+      },
     );
   }
+
+  /// 🔍 Resolve left/right asynchronously
+  Future<_EarablePair> _resolveEarables(List<OpenEarableV2> wearables) async {
+    OpenEarableV2? left;
+    OpenEarableV2? right;
+
+    for (var wearable in wearables) {
+      if (wearable is StereoDevice) {
+        final position = await wearable.position;
+
+        if (position == DevicePosition.left) {
+          left = wearable;
+        } else if (position == DevicePosition.right) {
+          right = wearable;
+        }
+      }
+    }
+
+    return _EarablePair(left: left, right: right);
+  }
+
+  String _buildMissingText(bool hasLeft, bool hasRight) {
+    if (!hasLeft && !hasRight) {
+      return "Left and right earables are not connected.";
+    } else if (!hasLeft) {
+      return "Left earable is not connected.";
+    } else {
+      return "Right earable is not connected.";
+    }
+  }
+
+  void _logWearables(List<Wearable> wearables) {
+    for (var wearable in wearables) {
+      print(wearable.name + " " + wearable.deviceId);
+      for(Sensor sensor in wearable.requireCapability<SensorManager>().sensors) {
+        print("${sensor.sensorName} ${sensor.axisNames.reduce((a,b)=> a+b)}");
+      }
+    }
+  }
+}
+
+
+
+
+class _EarablePair {
+  final OpenEarableV2? left;
+  final OpenEarableV2? right;
+
+  _EarablePair({this.left, this.right});
 }

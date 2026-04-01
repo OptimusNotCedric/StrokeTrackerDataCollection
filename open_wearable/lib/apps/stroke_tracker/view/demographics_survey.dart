@@ -15,6 +15,7 @@ typedef SurveyResults = Map<String, dynamic>;
 enum Gender {
   male,
   female,
+  other
 }
 
 /// ---------------------------------------------------------------------------
@@ -22,8 +23,8 @@ enum Gender {
 /// ---------------------------------------------------------------------------
 class DemographicsSurvey extends StatefulWidget {
   final StudyProtocol protocol;
-  final Wearable leftWearable;
-  final Wearable rightWearable;
+  final OpenEarableV2 leftWearable;
+  final OpenEarableV2 rightWearable;
   final SensorConfigurationProvider leftConfigProvider;
   final SensorConfigurationProvider rightConfigProvider;
   
@@ -125,6 +126,10 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
                       title: Text(t("Female", "Weiblich")),
                       value: Gender.female,
                     ),
+                    RadioListTile<Gender>(
+                      title: Text(t("Other", "Divers")),
+                      value: Gender.other,
+                    ),
                   ],
                 ),
               ),
@@ -138,8 +143,8 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
                 children: [
                   Text(
                     t(
-                      "Do you have any predispositions that could impede this study?",
-                      "Haben Sie Vorerkrankungen, die diese Studie beeinträchtigen könnten?"
+                      "Do you have any conditions or limitations that could affect your ability to perform this study (e.g., turning your neck, smiling, or using both hands and arms)?",
+                      "Haben Sie gesundheitliche Einschränkungen oder Beschwerden, die Ihre Fähigkeit zur Durchführung dieser Studie beeinträchtigen könnten (z. B. Kopf drehen, lächeln oder beide Hände und Arme benutzen)?"
                     ),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),

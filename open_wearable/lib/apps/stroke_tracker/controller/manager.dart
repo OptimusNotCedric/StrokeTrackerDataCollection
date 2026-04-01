@@ -1,15 +1,16 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/config.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 
-class ExperimentManager {
+class ExperimentManager extends ChangeNotifier{
   final ExperimentLogger logger;
   final ExperimentConfig expConfig;
-  final Wearable leftWearable;
-  final Wearable rightWearable;
+  final OpenEarableV2 leftWearable;
+  final OpenEarableV2 rightWearable;
   final SensorConfigurationProvider leftSensorCfgProvider;
   final SensorConfigurationProvider rightSensorCfgProvider;
 
@@ -276,4 +277,49 @@ class ExperimentManager {
       }
     }
   }
+  /*
+  Future<void> runSealCheck() async {
+    if (_isSealChecking || _isDisposed) {
+      return;
+    }
+    _sealCheckError = null;
+    _isSealChecking = true;
+    notifyListeners();
+ 
+    try {
+ 
+      for (final OpenEarableV2 wearable in [leftWearable,rightWearable]) {
+        final AudioResponseManager? manager = wearable
+            .getCapability<AudioResponseManager>();
+        if (manager == null) {
+          throw StateError(
+            'Audio response capability not available on ${wearable.name}.',
+          );
+        }
+        final Map<String, dynamic> data = await manager.measureAudioResponse(
+          const <String, dynamic>{},
+        );
+        debugPrint('SealCheck raw (${wearable.deviceId}): ${jsonEncode(data)}');
+        _sealCheckById[wearable.deviceId] = SealCheckResult.fromResponse(
+          wearable: wearable,
+          data: data,
+          timestamp: DateTime.now(),
+        );
+        final SealCheckResult parsed = _sealCheckById[wearable.deviceId]!;
+        debugPrint(
+          'SealCheck parsed (${wearable.deviceId}): '
+          'quality=${parsed.quality}, '
+          'mean=${parsed.meanMagnitude}, '
+          'peaks=${parsed.numPeaks}',
+        );
+      }
+    } catch (error) {
+      _sealCheckError = 'Seal check failed: ${describeError(error)}';
+    } finally {
+      _isSealChecking = false;
+      if (!_isDisposed) {
+        notifyListeners();
+      }
+    }
+  }*/
 }

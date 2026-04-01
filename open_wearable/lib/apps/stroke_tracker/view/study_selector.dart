@@ -12,8 +12,8 @@ import 'package:provider/provider.dart';
 
 class StudySelection extends StatefulWidget {
   // Hinzufügen der benötigten Parameter
-  final Wearable leftWearable;
-  final Wearable rightWearable;
+  final OpenEarableV2 leftWearable;
+  final OpenEarableV2 rightWearable;
   final SensorConfigurationProvider leftConfigProvider;
   final SensorConfigurationProvider rightConfigProvider;
 

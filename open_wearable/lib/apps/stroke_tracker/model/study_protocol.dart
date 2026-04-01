@@ -40,12 +40,12 @@ class StudyProtocol {
     type: StudyStepType.measuring,
     measuringInstructions: [
       t(
-        "Instruct the patient to turn the head from right to left",
-        "Den Patienten anweisen, den Kopf von rechts nach links zu drehen"
+        "Instruct the patient to start with the head in a neutral position, then turn it to the right, back to neutral, and then to the left.",
+        "Den Patienten anweisen, den Kopf zunächst in die neutrale Position zu bringen, dann nach rechts zu drehen, zurück zur Neutralstellung und anschließend nach links."
       ),
       t(
-        "Instruct the patient to turn the head from left to right",
-        "Den Patienten anweisen, den Kopf von links nach rechts zu drehen"
+        "Instruct the patient to start with the head in a neutral position, then turn it to the left, back to neutral, and then to the right.",
+        "Den Patienten anweisen, den Kopf zunächst in die neutrale Position zu bringen, dann nach links zu drehen, zurück zur Neutralstellung und anschließend nach rechts."
       ),
     ],
     repetitions: 3,
@@ -54,16 +54,16 @@ class StudyProtocol {
     type: StudyStepType.instruction,
     heading: t("Tap Earables", "Earables antippen"),
     description: t(
-      "During the recording tap one earable with the opposing arm",
-      "Während der Aufnahme ein Earable mit dem gegenüberliegenden Arm antippen"
+      "During the recording tap twice one earable with the opposing arm twice",
+      "Während der Aufnahme ein Earable mit dem gegenüberliegenden Arm zweimal antippen"
     ),
   ),
   StudyStep(
     type: StudyStepType.measuring,
     measuringInstructions: [
       t(
-        "Instruct the patient to tap the right Earable with the left Hand",
-        "Den Patienten anweisen, das rechte Earable mit der linken Hand zu berühren"
+        "Instruct the patient to tap the right Earable with the left Hand twice",
+        "Den Patienten anweisen, das rechte Earable mit der linken Hand zweimal anzutippen"
       ),
     ],
     repetitions: 1,
@@ -72,8 +72,8 @@ class StudyProtocol {
     type: StudyStepType.measuring,
     measuringInstructions: [
       t(
-        "Instruct the patient to tap the left Earable with the right Hand",
-        "Den Patienten anweisen, das linke Earable mit der rechten Hand zu berühren"
+        "Instruct the patient to tap the left Earable with the right Hand twice",
+        "Den Patienten anweisen, das linke Earable mit der rechten Hand zweimal anzutippen"
       ),
     ],
     repetitions: 1,
@@ -82,8 +82,8 @@ class StudyProtocol {
     type: StudyStepType.measuring,
     measuringInstructions: [
       t(
-        "Instruct the patient to tap the right Earable with the left Hand",
-        "Den Patienten anweisen, das rechte Earable mit der linken Hand zu berühren"
+        "Instruct the patient to tap the right Earable with the left Hand twice",
+        "Den Patienten anweisen, das rechte Earable mit der linken zweimal anzutippen"
       ),
     ],
     repetitions: 1,
@@ -92,8 +92,8 @@ class StudyProtocol {
     type: StudyStepType.measuring,
     measuringInstructions: [
       t(
-        "Instruct the patient to tap the left Earable with the right Hand",
-        "Den Patienten anweisen, das linke Earable mit der rechten Hand zu berühren"
+        "Instruct the patient to tap the left Earable with the right Hand twice",
+        "Den Patienten anweisen, das linke Earable mit der rechten zweimal anzutippen"
       ),
     ],
     repetitions: 1,
@@ -102,7 +102,7 @@ class StudyProtocol {
     measuringInstructions: [
       t(
         "Instruct the patient to tap the right Earable with the left Hand",
-        "Den Patienten anweisen, das rechte Earable mit der linken Hand zu berühren"
+        "Den Patienten anweisen, das rechte Earable mit der linken zweimal anzutippen"
       ),
     ],
     repetitions: 1,
@@ -111,8 +111,8 @@ class StudyProtocol {
     type: StudyStepType.measuring,
     measuringInstructions: [
       t(
-        "Instruct the patient to tap the left Earable with the right Hand",
-        "Den Patienten anweisen, das linke Earable mit der rechten Hand zu berühren"
+        "Instruct the patient to tap the left Earable with the right Hand twice",
+        "Den Patienten anweisen, das linke Earable mit der rechten zweimal anzutippen"
       ),
     ],
     repetitions: 1,
