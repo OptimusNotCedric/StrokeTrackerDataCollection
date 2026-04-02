@@ -10,6 +10,8 @@ class SelectEarableView extends StatelessWidget {
     SensorConfigurationProvider rightConfig,
     OpenEarableV2 left,
     SensorConfigurationProvider leftConfig,
+    Wearable ring,
+    SensorConfigurationProvider ringConfig,
   ) startApp;
 
   const SelectEarableView({super.key, required this.startApp});
@@ -19,9 +21,10 @@ class SelectEarableView extends StatelessWidget {
     final prov = context.watch<WearablesProvider>();
 
     final wearables = prov.wearables.whereType<OpenEarableV2>().toList();
-    _logWearables(wearables);
+    final allWearables = prov.wearables;
+    _logWearables(allWearables);
     return FutureBuilder<_EarablePair>(
-      future: _resolveEarables(wearables),
+      future: _resolveEarables(wearables, allWearables),
       builder: (context, snapshot) {
         
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -40,10 +43,12 @@ class SelectEarableView extends StatelessWidget {
         final pair = snapshot.data!;
         final left = pair.left;
         final right = pair.right;
+        final ring = pair.ring;
 
         final hasLeft = left != null;
         final hasRight = right != null;
-        final bothConnected = hasLeft && hasRight;
+        final hasRing = ring != null;
+        final bothConnected = hasLeft && hasRight && hasRing;
 
         
         if (!bothConnected) {
@@ -87,34 +92,43 @@ class SelectEarableView extends StatelessWidget {
 
         // ✅ BOTH CONNECTED → START APP
         return startApp(
-          right!,
+          right,
           prov.getSensorConfigurationProvider(right),
-          left!,
+          left,
           prov.getSensorConfigurationProvider(left),
+          ring,
+          prov.getSensorConfigurationProvider(ring),
         );
       },
     );
   }
 
   /// 🔍 Resolve left/right asynchronously
-  Future<_EarablePair> _resolveEarables(List<OpenEarableV2> wearables) async {
+  Future<_EarablePair> _resolveEarables(List<OpenEarableV2> wearables, List<Wearable> allWearables) async {
     OpenEarableV2? left;
     OpenEarableV2? right;
-
-    for (var wearable in wearables) {
-      if (wearable is StereoDevice) {
-        final position = await wearable.position;
-
-        if (position == DevicePosition.left) {
-          left = wearable;
-        } else if (position == DevicePosition.right) {
-          right = wearable;
-        }
+    Wearable? ring;
+    for (var wearable in allWearables) {
+      if (wearable.name.contains("BCL")){
+        ring = wearable;
       }
     }
+    for (var wearable in wearables) {
+      
+      final position = await wearable.position;
 
-    return _EarablePair(left: left, right: right);
+      if (position == DevicePosition.left) {
+        left = wearable;
+      } else if (position == DevicePosition.right) {
+        right = wearable;
+      }
+      
+    }
+
+    return _EarablePair(left: left, right: right, ring: ring);
   }
+
+  
 
   String _buildMissingText(bool hasLeft, bool hasRight) {
     if (!hasLeft && !hasRight) {
@@ -142,6 +156,7 @@ class SelectEarableView extends StatelessWidget {
 class _EarablePair {
   final OpenEarableV2? left;
   final OpenEarableV2? right;
+  final Wearable? ring;
 
-  _EarablePair({this.left, this.right});
+  _EarablePair({this.left, this.right, this.ring});
 }

@@ -25,17 +25,20 @@ class DemographicsSurvey extends StatefulWidget {
   final StudyProtocol protocol;
   final OpenEarableV2 leftWearable;
   final OpenEarableV2 rightWearable;
+  final Wearable ring;
   final SensorConfigurationProvider leftConfigProvider;
   final SensorConfigurationProvider rightConfigProvider;
-  
+  final SensorConfigurationProvider ringConfigProvider;
 
   const DemographicsSurvey({
     super.key,
     required this.protocol,
     required this.leftWearable,
     required this.rightWearable,
+    required this.ring,
     required this.leftConfigProvider,
     required this.rightConfigProvider,
+    required this.ringConfigProvider,
   });
 
   @override
@@ -210,8 +213,10 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
             logger: _logger,
             leftWearable: widget.leftWearable,
             rightWearable: widget.rightWearable,
+            ring: widget.ring,
             leftConfigProvider: widget.leftConfigProvider,
             rightConfigProvider: widget.rightConfigProvider,
+            ringConfigProvider: widget.ringConfigProvider,
           ),
         ),
       );

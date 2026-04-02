@@ -94,11 +94,16 @@ class ExperimentLogger extends ChangeNotifier{
   static const String _otherCsvHeader =
       'SessionID,Block,Task,Time,RelativeTimeMS,EventType,Value';
 
+  static const String _syncCsvHeader =
+    'SessionID,DeviceTimestamp,PhoneTimestamp,RelativePhoneTimeMS,Side';
+
+  late File _syncCsvFile;
   late File _stepsCsvFile;
   late File _otherCsvFile;
 
   late String sessionID;
   late DateTime _sessionStartTime;
+  final List<(SyncEvent, String)> _syncEvents = [];
   final List<StepEvent> _stepEvents = [];
   final List<OtherEvent> _otherEvents = [];
 
@@ -111,8 +116,11 @@ class ExperimentLogger extends ChangeNotifier{
     if (!sync) {
       _stepsCsvFile = File('${dir.path}/steps_log.csv');
       _otherCsvFile = File('${dir.path}/other_log.csv');
+      _syncCsvFile = File('${dir.path}/sync_log.csv');
     }
-
+    if (!await _syncCsvFile.exists()) {
+      await _syncCsvFile.writeAsString(_syncCsvHeader);
+    }
     if (!await _stepsCsvFile.exists()){
       _stepsCsvFile.writeAsString(_stepsCsvHeader);
     }
@@ -122,6 +130,32 @@ class ExperimentLogger extends ChangeNotifier{
     }
 
     _sessionStartTime = DateTime.now();
+  }
+  void logSyncLeftEvent(int deviceTimestamp) {
+    _logSyncEvent(deviceTimestamp, "L");
+  }
+
+  void logSyncRightEvent(int deviceTimestamp) {
+    _logSyncEvent(deviceTimestamp, "R");
+  }
+
+  void logSyncRingEvent(int deviceTimestamp) {
+    _logSyncEvent(deviceTimestamp, "O");
+  }
+
+  void _logSyncEvent(int deviceTimestamp, String side) {
+    final now = DateTime.now();
+    final relative = now.difference(_sessionStartTime).inMilliseconds;
+
+    final event = SyncEvent(
+      deviceTimestamp: deviceTimestamp,
+      phoneTimestamp: now,
+      relativePhoneTime: relative,
+    );
+
+    _syncEvents.add((event, side));
+
+    print("SYNC $side: ${event.toCsvRow(sessionID)}");
   }
 
   void logOtherEvent(
@@ -179,6 +213,14 @@ class ExperimentLogger extends ChangeNotifier{
     print("Finalizing experiment");
 
     final converter = ListToCsvConverter();
+    final syncRows = <List<String>>[];
+
+    for (final (event, side) in _syncEvents) {
+      final row = event.toCsvRow(sessionID)..add(side);
+      syncRows.add(row);
+    }
+
+    final syncCsvData = converter.convert(syncRows);
 
     if (!sync) {
       final stepsRows = <List<String>>[];
@@ -196,11 +238,13 @@ class ExperimentLogger extends ChangeNotifier{
       await Future.wait([
         _stepsCsvFile.writeAsString("\n$stepsCsvData", mode: FileMode.append),
         _otherCsvFile.writeAsString("\n$otherCsvData", mode: FileMode.append),
+        _syncCsvFile.writeAsString("\n$syncCsvData", mode: FileMode.append),
       ]);
     }
 
     _stepEvents.clear();
     _otherEvents.clear();
+    _syncEvents.clear();
   }
 
   /// Get all log files in the documents directory

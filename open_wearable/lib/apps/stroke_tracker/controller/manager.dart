@@ -1,26 +1,40 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/config.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ExperimentManager extends ChangeNotifier{
   final ExperimentLogger logger;
   final ExperimentConfig expConfig;
   final OpenEarableV2 leftWearable;
   final OpenEarableV2 rightWearable;
+  final Wearable ring;
   final SensorConfigurationProvider leftSensorCfgProvider;
   final SensorConfigurationProvider rightSensorCfgProvider;
+  final SensorConfigurationProvider ringSensorCfgProvider;
 
   late List<SensorConfiguration> _leftSensorCfgs;
   late List<SensorConfiguration> _rightSensorCfgs;
+
   late Map<String, SensorConfiguration> _leftSensorIdToCfgMap;
   late Map<String, SensorConfiguration> _rightSensorIdToCfgMap;
+  
+  late ImuCsvWriter _imuCsvWriter;
+
+  Completer<void>? _leftReady;
+  Completer<void>? _rightReady;
+  Completer<void>? _ringReady;
+
+  bool startedConfigs = false;
 
   StreamSubscription<SensorValue>? _leftSubscription;
   StreamSubscription<SensorValue>? _rightSubscription;
+  StreamSubscription<SensorValue>? _ringSubscription;
 
   ExperimentManager({
     required this.logger,
@@ -29,6 +43,9 @@ class ExperimentManager extends ChangeNotifier{
     required this.leftSensorCfgProvider,
     required this.rightWearable,
     required this.rightSensorCfgProvider,
+    required this.ring,
+    required this.ringSensorCfgProvider,
+    
   }) {
     if (leftWearable is SensorConfigurationManager) {
       _leftSensorCfgs =
@@ -48,6 +65,7 @@ class ExperimentManager extends ChangeNotifier{
       _rightSensorIdToCfgMap = {};
       for (var configuration in _rightSensorCfgs) {
         _rightSensorIdToCfgMap[configuration.name] = configuration;
+      
       }
     } else {
       throw Exception(
@@ -130,6 +148,14 @@ class ExperimentManager extends ChangeNotifier{
           );
           print("record_Option activated${cfg.name}");
         }
+        if (sensorId == "9-Axis IMU" &&
+            cfg.availableOptions.contains(StreamSensorConfigOption())) {
+          cfgProvider.addSensorConfigurationOption(
+            cfg,
+            StreamSensorConfigOption(),
+          );
+        }
+
       }
     }
   }
@@ -147,7 +173,14 @@ class ExperimentManager extends ChangeNotifier{
               SensorConfiguration<SensorConfigurationValue>,
               SensorConfigurationValue
             )>
-      )> configureSensors() async {
+      )> configureSensors(String sessionId, int taskNumber, int repetitionNumber) async {
+    
+    if (startedConfigs) {
+      return (
+        <(SensorConfiguration<SensorConfigurationValue>, SensorConfigurationValue)>[],
+        <(SensorConfiguration<SensorConfigurationValue>, SensorConfigurationValue)>[],
+      );
+    }
     if (leftWearable is! SensorConfigurationManager) {
       throw Exception(
         "The left wearable does not support sensor configuration",
@@ -179,6 +212,11 @@ class ExperimentManager extends ChangeNotifier{
         sensorConfig,
       );
     }
+    _imuCsvWriter = ImuCsvWriter();
+    await _imuCsvWriter.init(sessionId, taskNumber, repetitionNumber);
+    _leftReady = Completer<void>();
+    _rightReady = Completer<void>();
+    _ringReady = Completer<void>();
     var leftSelectedCfgs = leftSensorCfgProvider.getSelectedConfigurations();
     for (var entry in leftSelectedCfgs) {
       SensorConfiguration config = entry.$1;
@@ -192,6 +230,85 @@ class ExperimentManager extends ChangeNotifier{
       SensorConfigurationValue value = entry.$2;
       config.setConfiguration(value);
     }
+
+    final sensorManager = ring.requireCapability<SensorManager>();
+    final Sensor accelSensor = sensorManager.sensors.firstWhere((s) => s.sensorName.toLowerCase() == "accelerometer".toLowerCase());
+
+    final Set<SensorConfiguration> configurations = {};
+    configurations.addAll(accelSensor.relatedConfigurations);
+
+    for (final SensorConfiguration configuration in configurations) {
+      if (configuration is ConfigurableSensorConfiguration && configuration.availableOptions.contains(StreamSensorConfigOption())) {
+        ringSensorCfgProvider.addSensorConfigurationOption(configuration, StreamSensorConfigOption());
+      }
+      List<SensorConfigurationValue> values = ringSensorCfgProvider.getSensorConfigurationValues(configuration, distinct: true);
+      ringSensorCfgProvider.addSensorConfiguration(configuration, values.first);
+      configuration.setConfiguration(ringSensorCfgProvider.getSelectedConfigurationValue(configuration)!);
+    }
+
+    _ringSubscription = accelSensor.sensorStream.listen((data) {
+      if (!(_ringReady!.isCompleted)) {
+            _ringReady!.complete();
+            print("ring sensor started");
+            logger.logSyncRingEvent(data.timestamp);
+          }
+      if (data is SensorDoubleValue) {
+        final double ax = data.values[0];
+        final double ay = data.values[1];
+        final double az = data.values[2];
+        _imuCsvWriter.write(data.timestamp, ax, ay, az);
+      }
+    });
+
+    if (leftWearable is SensorManager) {
+        List<Sensor> sensors = (leftWearable as SensorManager).sensors;
+        for (var sensor in sensors) {
+          if (sensor.sensorName.toLowerCase() == "accelerometer".toLowerCase()) {
+            _leftSubscription = sensor.sensorStream.listen(
+              (SensorValue value) {
+                if (!(_leftReady!.isCompleted)) {
+                  _leftReady!.complete();
+                  print("Left sensor started");
+                  logger.logSyncLeftEvent(value.timestamp);
+              }
+
+              },
+              onDone: () async => await _leftSubscription?.cancel(),
+              onError: (error) async {
+                print('Right streaming error: $error');
+                await _leftSubscription?.cancel();
+              },
+            );
+          }
+        }
+      }
+
+      if (rightWearable is SensorManager) {
+        List<Sensor> sensors = (rightWearable as SensorManager).sensors;
+        for (var sensor in sensors) {
+          if (sensor.sensorName.toLowerCase() == "accelerometer".toLowerCase()) {
+            _rightSubscription = sensor.sensorStream.listen(
+              
+              (SensorValue value) {if (!(_rightReady!.isCompleted)) {
+                _rightReady!.complete();
+                print("Right sensor started");
+                logger.logSyncRightEvent(value.timestamp);
+              }},
+              onDone: () async => await _rightSubscription?.cancel(),
+              onError: (error) async {
+                print('Right streaming error: $error');
+                await _rightSubscription?.cancel();
+              },
+            );
+          }
+        }
+      }
+    
+    await Future.wait([
+      _leftReady!.future,
+      _rightReady!.future,
+      _ringReady!.future,
+    ]);
 
     String leftSelectedCfgsString = leftSelectedCfgs.map(
       (entry) {
@@ -215,7 +332,7 @@ class ExperimentManager extends ChangeNotifier{
 
     print(leftSelectedCfgsString);
     print(rightSelectedCfgsString);
-
+    startedConfigs = false;
     return (leftSelectedCfgs, rightSelectedCfgs);
   }
 
@@ -226,9 +343,12 @@ class ExperimentManager extends ChangeNotifier{
       return;
     }
     print("deactivated sensors");
+    await _imuCsvWriter.close();
     await _leftSubscription?.cancel();
     await _rightSubscription?.cancel();
+    await _ringSubscription?.cancel();
 
+    
     // Deactivate each configured sensor by removing their options
     for (var sensorConfig in expConfig.globalSensorConfigs) {
       final sensorName = sensorConfig.sensor.toLowerCase();
@@ -276,6 +396,11 @@ class ExperimentManager extends ChangeNotifier{
         }
       }
     }
+    await Future.wait([
+      ringSensorCfgProvider.turnOffAllSensors(),
+    rightSensorCfgProvider.turnOffAllSensors(),
+    leftSensorCfgProvider.turnOffAllSensors(),
+    ]);
   }
   /*
   Future<void> runSealCheck() async {
@@ -322,4 +447,30 @@ class ExperimentManager extends ChangeNotifier{
       }
     }
   }*/
+}
+
+class ImuCsvWriter {
+  late File _file;
+  late IOSink _sink;
+
+  Future<void> init(String sessionId, int taskId, int repetitionNumber) async {
+    final dir = await getApplicationDocumentsDirectory();
+    _file = File('${dir.path}/${sessionId}_task_${taskId}_rep_${repetitionNumber}_imulog.csv');
+
+    // Write header if new
+    if (!await _file.exists()) {
+      await _file.writeAsString('timestamp,ax,ay,az\n');
+    }
+
+    _sink = _file.openWrite(mode: FileMode.append);
+  }
+
+  void write(int timestamp, double ax, double ay, double az) {
+    _sink.writeln('$timestamp,$ax,$ay,$az');
+  }
+
+  Future<void> close() async {
+    await _sink.flush();
+    await _sink.close();
+  }
 }

@@ -44,6 +44,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
   bool recording = false;
   List<(DateTime, Face,int, int)> faceBuffer = [];
   late final String Function(String en,String de) t;
+  bool isStarting = false;
 
   CameraLensDirection cameraLensDirection = CameraLensDirection.back;
 
@@ -85,6 +86,10 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
     if (_initializeControllerFuture != null) {
       await _initializeControllerFuture;
     }
+    setState(() {
+      
+      isStarting = true;
+    });
     print("started measurement camera");
     await widget.startMeasuring();
     DateTime lastLoggedTime = DateTime.now().subtract(Duration(seconds: 1));
@@ -93,7 +98,10 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
       return;
     }
     
-    print("stopped measuring");
+    setState(() {
+      recording = true;
+      isStarting = false;
+    });
     try {
       await _cameraController!.startImageStream(
         (CameraImage image) async{
@@ -536,7 +544,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
-                    onTap: recording ? _stopVideoRecording : _startVideoRecording,
+                    onTap: isStarting? null : (recording ? _stopVideoRecording : _startVideoRecording),
                     child: Container(
                       width: 80,
                       height: 80,
@@ -560,7 +568,25 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
                       fontSize: 14,
                     ),
                   ),
-              
+              if (isStarting)
+                Container(
+                  color: Colors.black.withOpacity(0.4),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(color: Colors.white),
+                        SizedBox(height: 20),
+                        Text(
+                          t("Starting sensors...", "Sensoren werden gestartet..."),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),),
             ],
       ),),);
   }

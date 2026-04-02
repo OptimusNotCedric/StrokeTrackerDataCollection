@@ -47,7 +47,7 @@ class _ConnectDevicesPageState extends State<ConnectDevicesPage> {
       );
     }).toList();
 
-    discoveredDevices.removeWhere((device) {return !device.name.contains("OpenEarable") ||  wearablesProvider.wearables.map((wearable) {return wearable.deviceId;}).contains(device.id);});
+    discoveredDevices.removeWhere((device) {return !(device.name.contains("OpenEarable") || device.name.contains("BCL")) ||  wearablesProvider.wearables.map((wearable) {return wearable.deviceId;}).contains(device.id);});
 
     List<Widget> discoveredDevicesWidgets = discoveredDevices.map((device) {
         return PlatformListTile(

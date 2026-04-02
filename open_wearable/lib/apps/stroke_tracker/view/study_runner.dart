@@ -25,8 +25,10 @@ class StudyRunner extends StatefulWidget {
   final ExperimentLogger logger;
   final OpenEarableV2 leftWearable;
   final OpenEarableV2 rightWearable;
+  final Wearable ring;
   final SensorConfigurationProvider leftConfigProvider;
   final SensorConfigurationProvider rightConfigProvider;
+  final SensorConfigurationProvider ringConfigProvider;
 
   const StudyRunner({
     super.key,
@@ -36,6 +38,8 @@ class StudyRunner extends StatefulWidget {
     required this.rightWearable,
     required this.leftConfigProvider,
     required this.rightConfigProvider,
+    required this.ring,
+    required this.ringConfigProvider,
   });
 
   @override
@@ -98,6 +102,8 @@ class _StudyRunnerState extends State<StudyRunner> {
       leftSensorCfgProvider: widget.leftConfigProvider,
       rightWearable: widget.rightWearable,
       rightSensorCfgProvider: widget.rightConfigProvider,
+      ring: widget.ring,
+      ringSensorCfgProvider: widget.ringConfigProvider,
     );
   }
 
@@ -116,7 +122,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     print("startSensorLogFilePrefix");
     await _manager.setSensorLogFilePrefix(recordingId);
     print("startConfigureSensors");
-    await _manager.configureSensors();
+    await _manager.configureSensors(widget.protocol.sessionId,_currentIndex,_repetitionCounter);
     print("Sensoren gestartet");
   }
 
@@ -125,7 +131,7 @@ class _StudyRunnerState extends State<StudyRunner> {
   }
 
   Future<void> _saveAndAdvance() async {
-    _stopAndConfirm();
+    await _stopAndConfirm();
     _logger.logTaskEnd();
     await _logger.stopAndWriteLogging(false);
     final currentStep = _steps[_currentIndex];
@@ -177,6 +183,8 @@ class _StudyRunnerState extends State<StudyRunner> {
             rightWearable: widget.rightWearable,
             leftConfigProvider: widget.leftConfigProvider,
             rightConfigProvider: widget.rightConfigProvider,
+            ring: widget.ring,
+            ringConfigProvider: widget.ringConfigProvider,
           ),
         ),
         (route) => route.isFirst,

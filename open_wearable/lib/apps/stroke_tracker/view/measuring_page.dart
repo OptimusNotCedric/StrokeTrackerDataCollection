@@ -38,7 +38,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   late final String Function(String en,String de) t;
   int countdown = 10;
   Timer? _timer;
-
+  bool isStarting = false;
   @override
   void initState() {
     super.initState();
@@ -47,7 +47,11 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
   Future<void> _startRecording() async {
     
-    
+    if (isStarting) return;
+
+  setState(() {
+    isStarting = true;
+  });
     
     await widget.startMeasuring();
     try {
@@ -59,8 +63,9 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
         "Recording_Start",
       );
       setState(() {
-        recording = true;
-      });
+      recording = true;
+      isStarting = false;
+    });
       _startTimer();
       debugPrint("MEasurement gestartet.");
     } catch (e) {
@@ -276,7 +281,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
 
                     // Button
                     GestureDetector(
-                      onTap: recording ? _stopRecording : _startRecording,
+                      onTap: isStarting? null : (recording ? _stopRecording : _startRecording),
                       child: AnimatedContainer(
                         duration: Duration(milliseconds: 200),
                         width: recording ? 90 : 80,
@@ -316,6 +321,25 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
                   ],
                 ),
               ),
+              if (isStarting)
+                Container(
+                  color: Colors.black.withOpacity(0.4),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(color: Colors.white),
+                        SizedBox(height: 20),
+                        Text(
+                          t("Starting sensors...", "Sensoren werden gestartet..."),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),),
             ],
           ),
         ),

@@ -9,7 +9,7 @@ class StrokeTrackerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SelectEarableView(
-      startApp: ( rightWearable, rightConfigProv, leftWearable, leftConfigProv) {
+      startApp: ( rightWearable, rightConfigProv, leftWearable, leftConfigProv, ring, ringConfigProv) {
         // Diese Ansicht startet, nachdem die Kopfhörer ausgewählt wurden.
         return
          StudySelection(
@@ -17,6 +17,8 @@ class StrokeTrackerView extends StatelessWidget {
           leftConfigProvider: leftConfigProv,
           rightWearable: rightWearable,
           rightConfigProvider: rightConfigProv,
+          ring: ring,
+          ringConfigProvider: ringConfigProv,
         );
       },);
 }

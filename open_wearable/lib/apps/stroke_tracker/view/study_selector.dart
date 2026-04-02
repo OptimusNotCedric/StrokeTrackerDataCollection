@@ -14,14 +14,18 @@ class StudySelection extends StatefulWidget {
   // Hinzufügen der benötigten Parameter
   final OpenEarableV2 leftWearable;
   final OpenEarableV2 rightWearable;
+  final Wearable ring;
   final SensorConfigurationProvider leftConfigProvider;
   final SensorConfigurationProvider rightConfigProvider;
+  final SensorConfigurationProvider ringConfigProvider;
 
   const StudySelection({super.key, 
     required this.leftWearable,
     required this.rightWearable,
     required this.leftConfigProvider,
     required this.rightConfigProvider,
+    required this.ring,
+    required this.ringConfigProvider,
   });
 
   @override
@@ -49,8 +53,12 @@ class _StudySelectionState extends State<StudySelection> {
           protocol: protocol, 
           leftWearable: widget.leftWearable, 
           rightWearable: widget.rightWearable, 
+          ring: widget.ring,
           leftConfigProvider: widget.leftConfigProvider, 
-          rightConfigProvider: widget.rightConfigProvider,),),)
+          rightConfigProvider: widget.rightConfigProvider,
+          ringConfigProvider: widget.rightConfigProvider,
+          )
+          ,),)
     );
   }
 
