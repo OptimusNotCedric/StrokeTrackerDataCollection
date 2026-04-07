@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  audioplayers_windows
   face_detection_tflite
   file_selector_windows
   permission_handler_windows

@@ -336,14 +336,19 @@ class ExperimentManager extends ChangeNotifier{
     return (leftSelectedCfgs, rightSelectedCfgs);
   }
 
+  Future<void> playSoundLeftEarable() async {
+    JinglePlayer jinglePlayer = leftWearable.requireCapability<JinglePlayer>();
+    await jinglePlayer.playJingle(jinglePlayer.supportedJingles.first);
+  }
+  
+  Future<void> playSoundRightEarable() async {
+    JinglePlayer jinglePlayer = rightWearable.requireCapability<JinglePlayer>();
+    await jinglePlayer.playJingle(jinglePlayer.supportedJingles.first);
+  }
+
   /// Deactivate all configured sensors
   Future<void> deactivateSensors() async {
-    if ((leftWearable is! SensorConfigurationManager ||
-        rightWearable is! SensorConfigurationManager)) {
-      return;
-    }
     print("deactivated sensors");
-    await _imuCsvWriter.close();
     await _leftSubscription?.cancel();
     await _rightSubscription?.cancel();
     await _ringSubscription?.cancel();

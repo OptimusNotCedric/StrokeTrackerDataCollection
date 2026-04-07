@@ -249,6 +249,7 @@ class _StudyRunnerState extends State<StudyRunner> {
             faceDetector: _faceDetectorIsolate,
             recordingId: widget.protocol.sessionId,
             t: widget.protocol.t,
+            dispose: _manager.deactivateSensors,
             );
         }
 
@@ -257,6 +258,7 @@ class _StudyRunnerState extends State<StudyRunner> {
         }
 
         if (step.type == StudyStepType.measuring) {
+          bool playsound = false;
           return MeasuringScreen(
             repetitions: step.repetitions, 
             onNext: _saveAndAdvance, 
@@ -267,7 +269,11 @@ class _StudyRunnerState extends State<StudyRunner> {
             recordingId: widget.protocol.sessionId, 
             taskName: step.heading, 
             instruction: step.measuringInstructions[step.instructionOrder[_repetitionCounter-1]],
+            playSound: step.playSound,
+            soundSide: step.soundside,
             t: widget.protocol.t,
+            dispose: _manager.deactivateSensors,
+            manager: _manager,
             );
         }
         return PlatformScaffold(

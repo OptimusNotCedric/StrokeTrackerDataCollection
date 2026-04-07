@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
+import 'package:open_wearable/apps/stroke_tracker/controller/manager.dart';
+import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
+import 'package:flutter/services.dart';
 
 
 class MeasuringScreen extends StatefulWidget {
@@ -9,11 +13,15 @@ class MeasuringScreen extends StatefulWidget {
   final Future<void> Function() onNext;  
   final Future<void> Function() startMeasuring;
   final Future<void> Function() stopMeasuring;
+  final Future<void> Function() dispose;
   final String Function(String en,String de) t;
   final ExperimentLogger logger;
   final String recordingId;
   final String taskName;
   final String instruction;
+  final bool playSound;
+  final Side soundSide;
+  final ExperimentManager manager;
 
   const MeasuringScreen({
     super.key,
@@ -26,7 +34,11 @@ class MeasuringScreen extends StatefulWidget {
     required this.recordingId,
     required this.taskName,
     required this.instruction,
+    required this.playSound,
+    required this.soundSide,
     required this.t,
+    required this.dispose,
+    required this.manager,
   });
 
   @override
@@ -39,6 +51,16 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   int countdown = 10;
   Timer? _timer;
   bool isStarting = false;
+  final player = AudioPlayer();
+
+  Future<void> playLeft() async {
+  await widget.manager.playSoundLeftEarable();
+}
+
+Future<void> playRight() async {
+  await widget.manager.playSoundRightEarable();
+}
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +76,15 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   });
     
     await widget.startMeasuring();
+    if (widget.playSound) {
+      if(widget.soundSide == Side.right) {
+        playRight();
+      }
+
+      if (widget.soundSide == Side.left) {
+        playLeft();
+      }
+    }
     try {
 
       widget.logger.logOtherEvent(
@@ -144,6 +175,7 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   void dispose() {
     widget.stopMeasuring();
     _timer?.cancel();
+    widget.dispose();
     super.dispose();
   }
 

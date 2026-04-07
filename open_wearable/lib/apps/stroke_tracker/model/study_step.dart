@@ -3,6 +3,7 @@
 import 'dart:math';
 
 enum StudyStepType { instruction, measuring, cameraMeasurement, ending}
+enum Side {left,right}
 
 class StudyStep {
   final StudyStepType type;
@@ -15,10 +16,14 @@ class StudyStep {
   final bool secondaryDescription;
   final String secondaryDescriptionString;
   late final List<int> instructionOrder;
+  final bool playSound;
+  final Side soundside;
 
   StudyStep({
     required this.type,
     this.heading = "",
+    this.playSound = false,
+    this.soundside = Side.left,
     this.pathToImage = "",
     this.description = "",
     this.repetitions = 1,

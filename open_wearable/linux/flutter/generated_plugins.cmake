@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  audioplayers_linux
   face_detection_tflite
   file_selector_linux
   open_file_linux

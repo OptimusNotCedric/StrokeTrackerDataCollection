@@ -14,6 +14,7 @@ class CameraMeasuringScreen extends StatefulWidget {
   final Future<void> Function() onNext;  
   final Future<void> Function() startMeasuring;
   final Future<void> Function() stopMeasuring;
+  final Future<void> Function() dispose;
   final String Function(String en,String de) t;
   final FaceDetectorIsolate faceDetector;
   final ExperimentLogger logger;
@@ -31,6 +32,7 @@ class CameraMeasuringScreen extends StatefulWidget {
     required this.logger,
     required this.recordingId,
     required this.t,
+    required this.dispose,
   });
 
   @override
@@ -285,6 +287,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
     widget.stopMeasuring();
     _timer?.cancel();
     _cameraController?.dispose();
+    widget.dispose();
     super.dispose();
   }
 
