@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/config.dart';
@@ -10,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 
 class ExperimentManager extends ChangeNotifier{
   final ExperimentLogger logger;
+  late AudioPlayer _player;
   final ExperimentConfig expConfig;
   final OpenEarableV2 leftWearable;
   final OpenEarableV2 rightWearable;
@@ -336,14 +339,31 @@ class ExperimentManager extends ChangeNotifier{
     return (leftSelectedCfgs, rightSelectedCfgs);
   }
 
-  Future<void> playSoundLeftEarable() async {
-    JinglePlayer jinglePlayer = leftWearable.requireCapability<JinglePlayer>();
-    await jinglePlayer.playJingle(jinglePlayer.supportedJingles.first);
-  }
-  
-  Future<void> playSoundRightEarable() async {
-    JinglePlayer jinglePlayer = rightWearable.requireCapability<JinglePlayer>();
-    await jinglePlayer.playJingle(jinglePlayer.supportedJingles.first);
+  Future<void> playSound({required bool left}) async {
+  final results = await Future.wait([
+    rootBundle.load('lib/apps/stroke_tracker/assets/dirac.wav'),
+    rootBundle.load('lib/apps/stroke_tracker/assets/white_noise.wav'),
+  ]);
+  _player = AudioPlayer();
+  final dirac = results[0];
+  final noise = results[1];
+
+  // Set side
+  await _player.setBalance(left ? -1.0 : 1.0);
+
+  // Play dirac
+  await _player.play(BytesSource(dirac.buffer.asUint8List()));
+  await _player.onPlayerComplete.first;
+
+  // Play noise (same side)
+  await _player.play(BytesSource(noise.buffer.asUint8List()));
+  await _player.onPlayerComplete.first;
+}
+
+  Future<void> synchronizeTime() async {
+    leftWearable.requireCapability<TimeSynchronizable>().synchronizeTime();
+    rightWearable.requireCapability<TimeSynchronizable>().synchronizeTime();
+    ring.requireCapability<TimeSynchronizable>().synchronizeTime();
   }
 
   /// Deactivate all configured sensors
@@ -459,8 +479,10 @@ class ImuCsvWriter {
   late IOSink _sink;
 
   Future<void> init(String sessionId, int taskId, int repetitionNumber) async {
+    var now = DateTime.now();
+
     final dir = await getApplicationDocumentsDirectory();
-    _file = File('${dir.path}/${sessionId}_task_${taskId}_rep_${repetitionNumber}_imulog.csv');
+    _file = File('${dir.path}/${sessionId}_task_${taskId}_rep_${repetitionNumber}_${now.minute}:${now.second}_imulog.csv');
 
     // Write header if new
     if (!await _file.exists()) {

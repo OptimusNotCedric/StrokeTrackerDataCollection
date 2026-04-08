@@ -192,8 +192,9 @@ class _StudyRunnerState extends State<StudyRunner> {
     }
   }
 
-  void _nextStep() {
+  Future<void> _nextStep() async {
     print("go to next Step");
+    _manager.synchronizeTime();
     if (_currentIndex < _steps.length - 1) {
       setState(() => _currentIndex++);
     } else {
@@ -227,7 +228,6 @@ class _StudyRunnerState extends State<StudyRunner> {
         }
 
         final step = _steps[_currentIndex];
-
         if (step.type == StudyStepType.instruction) {
           return InstructionScreen(
             heading: step.heading,
@@ -258,7 +258,6 @@ class _StudyRunnerState extends State<StudyRunner> {
         }
 
         if (step.type == StudyStepType.measuring) {
-          bool playsound = false;
           return MeasuringScreen(
             repetitions: step.repetitions, 
             onNext: _saveAndAdvance, 

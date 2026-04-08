@@ -90,7 +90,7 @@ class SelectEarableView extends StatelessWidget {
           );
         }
 
-        // ✅ BOTH CONNECTED → START APP
+        // All CONNECTED → START APP
         return startApp(
           right,
           prov.getSensorConfigurationProvider(right),
@@ -114,7 +114,6 @@ class SelectEarableView extends StatelessWidget {
       }
     }
     for (var wearable in wearables) {
-      
       final position = await wearable.position;
 
       if (position == DevicePosition.left) {

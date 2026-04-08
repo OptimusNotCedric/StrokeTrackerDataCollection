@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/manager.dart';
@@ -51,14 +50,13 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   int countdown = 10;
   Timer? _timer;
   bool isStarting = false;
-  final player = AudioPlayer();
 
   Future<void> playLeft() async {
-  await widget.manager.playSoundLeftEarable();
+  await widget.manager.playSound(left:true);
 }
 
 Future<void> playRight() async {
-  await widget.manager.playSoundRightEarable();
+  await widget.manager.playSound(left:false);
 }
 
   @override
