@@ -139,6 +139,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     await Navigator.push(context, 
     MaterialPageRoute(
     builder: (context) => TaskScreen(
+      manager: _manager,
       maxRepetition: maxRepetitions, 
       currentRepetition: _repetitionCounter, 
       logger: _logger,

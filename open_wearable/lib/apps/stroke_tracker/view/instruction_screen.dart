@@ -175,6 +175,25 @@ Widget build(BuildContext context) {
                           style: const TextStyle(fontSize: 18, color: Colors.black87)),
                     ),
                     const SizedBox(height: 24),
+                    // Füge dies im SingleChildScrollView ein, direkt nach der Beschreibung
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Colors.yellow[100], // Hinweisfarbe
+                        border: Border.all(color: Colors.orange),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Text(
+                        widget.t(
+                          "Please make sure to wear the left and right earbuds in the correct ear and the ring on a finger of the right hand of the participant before starting the test.",
+                          "Bitte setze die linken und rechten Ohrhörer im richtigen Ohr ein und achte darauf das der Ring an einem Finger der rechten Hand des Teilnehmers sitzt, bevor du den Test startest.",
+                        ),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 24),
                     _buildEarbudSection(Side.left, isMeasuringLeft, leftResult),
                     _buildEarbudSection(Side.right, isMeasuringRight, rightResult),
                     if (!canContinue)

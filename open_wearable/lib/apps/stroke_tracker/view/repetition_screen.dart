@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
+import 'package:open_wearable/apps/stroke_tracker/controller/manager.dart';
+import 'package:open_wearable/apps/stroke_tracker/view/sealcheck.dart';
 
 class LikertChoice extends StatefulWidget{
   final Function(int) onScoreChanged;
@@ -72,6 +74,7 @@ class TaskScreen extends StatefulWidget{
   final int currentStepNumber;
   final String currentStepTask;
   final ExperimentLogger logger;
+  final ExperimentManager manager;
   final Future<void> Function() onLeaveStudy;
   final String Function(String en,String de) translate;
 
@@ -84,6 +87,7 @@ class TaskScreen extends StatefulWidget{
     required this.currentStepNumber,
     required this.currentStepTask,
     required this.translate,
+    required this.manager,
   });
 
   @override
@@ -146,9 +150,22 @@ class _TaskScreenState extends State<TaskScreen> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
+            icon: Icon(Icons.hearing), // or any icon you like
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SimpleSealCheckScreen(
+                    t: t,
+                    sealCheck: widget.manager.runSealCheck,
+                  ),
+                ),
+              );}),
+          IconButton(
             icon: const Icon(Icons.exit_to_app),
             onPressed: _onLeavePressed,
           ),
+
         ],
       ),
       body: Center(
