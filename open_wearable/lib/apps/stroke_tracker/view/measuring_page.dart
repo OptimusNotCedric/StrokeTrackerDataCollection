@@ -38,6 +38,7 @@ class MeasuringScreen extends StatefulWidget {
     required this.t,
     required this.dispose,
     required this.manager,
+
   });
 
   @override

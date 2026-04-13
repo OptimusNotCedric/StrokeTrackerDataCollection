@@ -67,7 +67,7 @@ class StudyProtocol {
       ),
     ],
     playSound: true,
-    soundside: Side.left,
+    soundside: Side.right,
     repetitions: 1,
   ),
   StudyStep(

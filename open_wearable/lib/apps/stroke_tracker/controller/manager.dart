@@ -75,6 +75,7 @@ class ExperimentManager extends ChangeNotifier{
         "The right wearable does not support sensor configuration",
       );
     }
+    
   }
 
   Future<void> setSensorLogFilePrefix(String prefix) async {
@@ -340,24 +341,23 @@ class ExperimentManager extends ChangeNotifier{
   }
 
   Future<void> playSound({required bool left}) async {
-  final results = await Future.wait([
-    rootBundle.load('lib/apps/stroke_tracker/assets/dirac.wav'),
-    rootBundle.load('lib/apps/stroke_tracker/assets/white_noise.wav'),
-  ]);
-  _player = AudioPlayer();
-  final dirac = results[0];
-  final noise = results[1];
-
-  // Set side
-  await _player.setBalance(left ? -1.0 : 1.0);
-
-  // Play dirac
-  await _player.play(BytesSource(dirac.buffer.asUint8List()));
-  await _player.onPlayerComplete.first;
-
-  // Play noise (same side)
-  await _player.play(BytesSource(noise.buffer.asUint8List()));
-  await _player.onPlayerComplete.first;
+  OpenEarableV2 wearable = left ? leftWearable : rightWearable;
+  try {
+      
+      final AudioResponseManager? manager = wearable
+        .getCapability<AudioResponseManager>();
+      if (manager == null) {
+        throw StateError(
+          'Audio response capability not available on ${wearable.name}.',
+        );
+      }
+      await manager.measureAudioResponse(
+          const <String, dynamic>{},
+        );
+        
+    } catch (error) {
+      print('Sound check failed: ${error}');
+    }
 }
 
   Future<void> synchronizeTime() async {
@@ -427,51 +427,28 @@ class ExperimentManager extends ChangeNotifier{
     leftSensorCfgProvider.turnOffAllSensors(),
     ]);
   }
-  /*
-  Future<void> runSealCheck() async {
-    if (_isSealChecking || _isDisposed) {
-      return;
-    }
-    _sealCheckError = null;
-    _isSealChecking = true;
-    notifyListeners();
- 
+  
+  Future<Map<String, dynamic>?> runSealCheck(bool isLeft) async {
+    OpenEarableV2 wearable = isLeft ? leftWearable:rightWearable;
+    Map<String, dynamic>? data;
     try {
- 
-      for (final OpenEarableV2 wearable in [leftWearable,rightWearable]) {
-        final AudioResponseManager? manager = wearable
-            .getCapability<AudioResponseManager>();
-        if (manager == null) {
-          throw StateError(
-            'Audio response capability not available on ${wearable.name}.',
-          );
-        }
-        final Map<String, dynamic> data = await manager.measureAudioResponse(
+      
+      final AudioResponseManager? manager = wearable
+        .getCapability<AudioResponseManager>();
+      if (manager == null) {
+        throw StateError(
+          'Audio response capability not available on ${wearable.name}.',
+        );
+      }
+      data = await manager.measureAudioResponse(
           const <String, dynamic>{},
         );
-        debugPrint('SealCheck raw (${wearable.deviceId}): ${jsonEncode(data)}');
-        _sealCheckById[wearable.deviceId] = SealCheckResult.fromResponse(
-          wearable: wearable,
-          data: data,
-          timestamp: DateTime.now(),
-        );
-        final SealCheckResult parsed = _sealCheckById[wearable.deviceId]!;
-        debugPrint(
-          'SealCheck parsed (${wearable.deviceId}): '
-          'quality=${parsed.quality}, '
-          'mean=${parsed.meanMagnitude}, '
-          'peaks=${parsed.numPeaks}',
-        );
-      }
+        
     } catch (error) {
-      _sealCheckError = 'Seal check failed: ${describeError(error)}';
-    } finally {
-      _isSealChecking = false;
-      if (!_isDisposed) {
-        notifyListeners();
-      }
+      print('Seal check failed: ${error}');
     }
-  }*/
+    return data;
+  }
 }
 
 class ImuCsvWriter {

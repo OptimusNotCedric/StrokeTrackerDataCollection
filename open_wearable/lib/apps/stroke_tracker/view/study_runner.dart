@@ -229,9 +229,14 @@ class _StudyRunnerState extends State<StudyRunner> {
 
         final step = _steps[_currentIndex];
         if (step.type == StudyStepType.instruction) {
-          return InstructionScreen(
+          return EarbudSealTestScreen(
+            sessionId: widget.protocol.sessionId,
+            logger: _logger,
             heading: step.heading,
+            currentRepetitionNumber: _repetitionCounter,
+            currentStepNumber: _currentIndex,
             description: step.description,
+            sealCheck: _manager.runSealCheck,
             onNext: _nextStep,
             onLeaveStudy: _leaveStudy,
             t: widget.protocol.t,

@@ -62,27 +62,11 @@ class _StudySelectionState extends State<StudySelection> {
     );
   }
 
-  
-  @override
+   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
-        title: Text('Submit Your ID'),
         actions: [
-          Row(
-              children: [
-                Text(isEnglish ? 'EN' : 'DE'),
-                Switch(
-                  value: isEnglish,
-                  onChanged: (value) {
-                    setState(() {
-                      isEnglish = value;
-                    });
-                  },
-                ),
-              ],
-            ),
           IconButton(
             icon: Icon(Icons.download),
             onPressed: () {
@@ -91,7 +75,7 @@ class _StudySelectionState extends State<StudySelection> {
                 MaterialPageRoute(
                   builder: (context) => DownloadScreen(),
                 ),
-                );
+              );
             },
           ),
         ],
@@ -102,25 +86,63 @@ class _StudySelectionState extends State<StudySelection> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // LANGUAGE SELECTION
               Text(
-                isEnglish 
-                  ? 'Enter your Participant ID' 
-                  : 'Teilnehmer-ID eingeben',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                'Select your language / Wählen Sie Ihre Sprache',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => setState(() => isEnglish = true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isEnglish ? Colors.blue : Colors.grey[300],
+                    ),
+                    child: Text(
+                      'English',
+                      style: TextStyle(
+                        color: isEnglish ? Colors.white : Colors.black,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: () => setState(() => isEnglish = false),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: !isEnglish ? Colors.blue : Colors.grey[300],
+                    ),
+                    child: Text(
+                      'Deutsch',
+                      style: TextStyle(
+                        color: !isEnglish ? Colors.white : Colors.black,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 40),
+
+              // PARTICIPANT ID INPUT
+              Text(
+                isEnglish ? 'Enter your Participant ID' : 'Teilnehmer-ID eingeben',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
               TextField(
                 controller: _controller,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: isEnglish ? 'Participant ID' : 'Teilnehmer-ID',
-                  
-                  hintText: isEnglish ? 'Letters and numbers only' 
-                      : 'Nur Buchstaben und Zahlen',
+                  hintText: isEnglish ? 'Letters and numbers only' : 'Nur Buchstaben und Zahlen',
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -129,7 +151,7 @@ class _StudySelectionState extends State<StudySelection> {
                     padding: const EdgeInsets.all(12.0),
                     child: Text(
                       isEnglish ? 'Submit' : 'Absenden',
-                      style: TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 18),
                     ),
                   ),
                 ),
@@ -140,7 +162,6 @@ class _StudySelectionState extends State<StudySelection> {
       ),
     );
   }
-    
 }
 
 

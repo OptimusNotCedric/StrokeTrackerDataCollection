@@ -189,6 +189,7 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
     results["age"] = age;
     results["gender"] = genderChoice.toString().split(".")[1];
     results["predispositions"] = predispotionsController.text;
+    results["particpiantId"] = widget.protocol.participantId;
 
     await _logger.startLogging(false, widget.protocol.sessionId);
 

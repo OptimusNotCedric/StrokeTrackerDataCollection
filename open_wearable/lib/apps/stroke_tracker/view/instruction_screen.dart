@@ -1,116 +1,227 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
+import 'package:open_wearable/apps/stroke_tracker/model/study_protocol.dart';
+import 'package:open_wearable/apps/stroke_tracker/view/repetition_screen.dart';
 
-class InstructionScreen extends StatelessWidget {
+class EarbudSealTestScreen extends StatefulWidget {
   final String heading;
   final String description;
-  final String Function(String en,String de) t;
+  final String Function(String en, String de) t;
+  final Future<Map<String, dynamic>?> Function(bool isLeft) sealCheck;
+  final ExperimentLogger logger;
   final VoidCallback onNext;
   final VoidCallback onLeaveStudy;
+  final int currentStepNumber;
+  final int currentRepetitionNumber;
+  final String sessionId;
 
-  const InstructionScreen({
+  const EarbudSealTestScreen({
     super.key,
     required this.heading,
     required this.description,
+    required this.t,
     required this.onNext,
     required this.onLeaveStudy,
-    required this.t,
+    required this.sealCheck,
+    required this.logger,
+    required this.currentRepetitionNumber,
+    required this.currentStepNumber,
+    required this.sessionId,
   });
 
   @override
-  Widget build(BuildContext context) {
-    
-    return PopScope(
-      canPop: false,
-    child: Scaffold(
-      body: Stack(
+  _EarbudSealTestScreenState createState() => _EarbudSealTestScreenState();
+}
+
+class _EarbudSealTestScreenState extends State<EarbudSealTestScreen> {
+  Map<String, dynamic>? leftResult;
+  Map<String, dynamic>? rightResult;
+
+  bool isMeasuringLeft = false;
+  bool isMeasuringRight = false;
+
+  // Simulated seal check data
+  
+
+  void checkSeal(Side side) async{
+    setState(() {
+      if (side == Side.left) {
+        isMeasuringLeft = true;
+      } else {
+        isMeasuringRight = true;
+      }
+    });
+
+    // Simulate a delay for measurement
+    if(isMeasuringLeft){
+      leftResult = await widget.sealCheck(true);
+      print(leftResult);
+      setState(() {
+        isMeasuringLeft = false;
+      });
+    } else {
+      rightResult = await widget.sealCheck(false);
+      print(rightResult);
+      setState(() {
+      isMeasuringRight = false;});
+    }
+
+  }
+
+  void resetResults() {
+    setState(() {
+      leftResult = null;
+      rightResult = null;
+      isMeasuringLeft = false;
+      isMeasuringRight = false;
+    });
+  }
+
+  void goNext() async{
+    await widget.logger.startLogging(false, widget.sessionId);
+    widget.logger.logOtherEvent(
+      widget.currentRepetitionNumber, "Sealquality", "${widget.currentStepNumber}",
+       "left: ${leftResult?['quality']}, right${rightResult?['quality']}");
+    await widget.logger.stopAndWriteLogging(false);
+    widget.onNext();
+  }
+
+  Widget _buildResultCard(Map<String, dynamic> result) {
+  final theme = Theme.of(context);
+  final int quality = result['quality'] ?? -1;
+
+  return Card(
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(24),
-            // 1. Die Haupt-Column füllt jetzt den ganzen Bildschirm
-            child: Column(
-              children: [
-                // 2. Dieser 'Expanded'-Bereich nimmt allen freien Platz ein
-                Expanded(
-                  child: Center(
-                    // 3. Der Inhalt wird *innerhalb* des freien Platzes zentriert
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          heading,
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 24), // Etwas mehr Abstand
-
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              t("Task:", "Aufgabe:"),
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(16.0),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey[300]!),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: Text(
-                                description,
-                                // textAlign: TextAlign.center, // Entfernt
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 24),
-
-                      ],
-                    ),
-                  ),
-                ),
-
-                // 4. Die Buttons sind jetzt außerhalb von 'Expanded' und damit am Boden
-                // 5. 'SizedBox' sorgt für die volle Breite
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: onNext,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      t("Continue", "Weiter"),
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12), // Abstand
-
-              ],
-            ),
+          Text(
+            widget.t('Quality', 'Qualität') + ': ',
+            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          Text(
+            '$quality / 100',
+            style: theme.textTheme.bodyMedium,
           ),
         ],
       ),
-    ));
+    ),
+  );
+}
+
+  Widget _buildEarbudSection(Side side, bool isMeasuring, Map<String, dynamic>? result) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ElevatedButton(
+          onPressed: isMeasuring ? null : () => checkSeal(side),
+          child: Text(widget.t(
+            side == Side.left ? "Check Left Earbud" : "Check Right Earbud",
+            side == Side.left ? "Linkes Ohr prüfen" : "Rechtes Ohr prüfen",
+          )),
+        ),
+        const SizedBox(height: 8),
+        if (isMeasuring)
+          Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 16),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 8),
+                Text(widget.t("Measuring...", "Messung läuft...")),
+                const SizedBox(height: 16),
+              ],
+            ),
+          )
+        else if (result != null)
+          _buildResultCard(result),
+        const SizedBox(height: 16),
+      ],
+    );
   }
+
+  @override
+Widget build(BuildContext context) {
+  final bool canContinue = leftResult != null && rightResult != null;
+
+  return PopScope(
+    canPop: false,
+    child: Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(widget.heading,
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 24),
+                    Text(widget.t("Task:", "Aufgabe:"),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Text(widget.description,
+                          style: const TextStyle(fontSize: 18, color: Colors.black87)),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildEarbudSection(Side.left, isMeasuringLeft, leftResult),
+                    _buildEarbudSection(Side.right, isMeasuringRight, rightResult),
+                    if (!canContinue)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text(
+                          widget.t(
+                            "Please test both earbuds before continuing.",
+                            "Bitte teste beide Ohrhörer, bevor du fortfährst.",
+                          ),
+                          style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: resetResults,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.grey[400],
+                    ),
+                    child: Text(widget.t("Reset Results", "Ergebnisse zurücksetzen")),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: canContinue ? goNext : null,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Text(widget.t("Continue", "Weiter")),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 }
