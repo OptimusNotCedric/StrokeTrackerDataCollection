@@ -161,7 +161,7 @@ Widget build(BuildContext context) {
                     Text(widget.heading,
                         style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 24),
-                    Text(widget.t("Task:", "Aufgabe:"),
+                    Text(widget.t("Upcoming Task:", "Aufkommende Aufgabe:"),
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Container(

@@ -109,7 +109,7 @@ class _StudyRunnerState extends State<StudyRunner> {
 
 
 
-  Future<void> _startMeasuring() async {
+  Future<void> _startMeasuring(bool useRing) async {
     //await _manager.deactivateSensors(); // <-- wichtig
     final step = _steps[_currentIndex];
     // final date = DateTime.now().toIso8601String().replaceAll(':', '-');
@@ -122,7 +122,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     print("startSensorLogFilePrefix");
     await _manager.setSensorLogFilePrefix(recordingId);
     print("startConfigureSensors");
-    await _manager.configureSensors(widget.protocol.sessionId,_currentIndex,_repetitionCounter);
+    await _manager.configureSensors(widget.protocol.sessionId,_currentIndex,_repetitionCounter, useRing);
     print("Sensoren gestartet");
   }
 
@@ -256,14 +256,16 @@ class _StudyRunnerState extends State<StudyRunner> {
             recordingId: widget.protocol.sessionId,
             t: widget.protocol.t,
             dispose: _manager.deactivateSensors,
+            useRing: false,
+            manager: _manager,
             );
         }
 
         if (step.type == StudyStepType.ending) {
           return SummaryScreen(onLeaveStudy: _leaveStudy,);
         }
-
-        if (step.type == StudyStepType.measuring) {
+        
+        if ( step.type == StudyStepType.measuringTap) {
           return MeasuringScreen(
             repetitions: step.repetitions, 
             onNext: _saveAndAdvance, 
@@ -279,6 +281,30 @@ class _StudyRunnerState extends State<StudyRunner> {
             t: widget.protocol.t,
             dispose: _manager.deactivateSensors,
             manager: _manager,
+            timer: 10,
+            useRing: true,
+            );
+        }
+
+        if (step.type == StudyStepType.measuringHead) {
+          
+          return MeasuringScreen(
+            repetitions: step.repetitions, 
+            onNext: _saveAndAdvance, 
+            startMeasuring: _startMeasuring, 
+            stopMeasuring: _stopAndConfirm, 
+            currentRepetition: _repetitionCounter, 
+            logger: _logger, 
+            recordingId: widget.protocol.sessionId, 
+            taskName: step.heading, 
+            instruction: step.measuringInstructions[step.instructionOrder[_repetitionCounter-1]],
+            playSound: step.playSound,
+            soundSide: step.soundside,
+            t: widget.protocol.t,
+            dispose: _manager.deactivateSensors,
+            manager: _manager,
+            timer: 15,
+            useRing: false,
             );
         }
         return PlatformScaffold(
@@ -298,6 +324,7 @@ class _StudyRunnerState extends State<StudyRunner> {
   @override
   void dispose() {
     _faceDetectorIsolate.dispose();
+    _manager.deactivateSensors();
     super.dispose();
   }
 }

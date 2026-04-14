@@ -177,7 +177,7 @@ class ExperimentManager extends ChangeNotifier{
               SensorConfiguration<SensorConfigurationValue>,
               SensorConfigurationValue
             )>
-      )> configureSensors(String sessionId, int taskNumber, int repetitionNumber) async {
+      )> configureSensors(String sessionId, int taskNumber, int repetitionNumber, bool useRing) async {
     
     if (startedConfigs) {
       return (
@@ -216,8 +216,10 @@ class ExperimentManager extends ChangeNotifier{
         sensorConfig,
       );
     }
+    if (useRing) {
     _imuCsvWriter = ImuCsvWriter();
     await _imuCsvWriter.init(sessionId, taskNumber, repetitionNumber);
+    }
     _leftReady = Completer<void>();
     _rightReady = Completer<void>();
     _ringReady = Completer<void>();
@@ -260,7 +262,9 @@ class ExperimentManager extends ChangeNotifier{
         final double ax = data.values[0];
         final double ay = data.values[1];
         final double az = data.values[2];
+        if (useRing) {
         _imuCsvWriter.write(data.timestamp, ax, ay, az);
+        }
       }
     });
 

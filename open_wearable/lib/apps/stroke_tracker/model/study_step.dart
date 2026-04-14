@@ -2,7 +2,7 @@
 
 import 'dart:math';
 
-enum StudyStepType { instruction, measuring, cameraMeasurement, ending}
+enum StudyStepType { instruction, measuringHead, measuringTap, cameraMeasurement, ending}
 enum Side {left,right}
 
 class StudyStep {

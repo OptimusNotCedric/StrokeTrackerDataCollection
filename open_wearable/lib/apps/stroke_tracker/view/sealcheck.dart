@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
 
-enum Side { left, right }
 
 class SimpleSealCheckScreen extends StatefulWidget {
   final String Function(String en, String de) t;

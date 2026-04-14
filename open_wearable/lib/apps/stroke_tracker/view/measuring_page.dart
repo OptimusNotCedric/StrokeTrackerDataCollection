@@ -4,13 +4,14 @@ import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/manager.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
 import 'package:flutter/services.dart';
+import 'package:open_wearable/apps/stroke_tracker/view/sealcheck.dart';
 
 
 class MeasuringScreen extends StatefulWidget {
   final int repetitions;
   final int currentRepetition;
   final Future<void> Function() onNext;  
-  final Future<void> Function() startMeasuring;
+  final Future<void> Function(bool useRing) startMeasuring;
   final Future<void> Function() stopMeasuring;
   final Future<void> Function() dispose;
   final String Function(String en,String de) t;
@@ -21,6 +22,8 @@ class MeasuringScreen extends StatefulWidget {
   final bool playSound;
   final Side soundSide;
   final ExperimentManager manager;
+  final int timer;
+  final bool useRing;
 
   const MeasuringScreen({
     super.key,
@@ -38,7 +41,8 @@ class MeasuringScreen extends StatefulWidget {
     required this.t,
     required this.dispose,
     required this.manager,
-
+    required this.timer,
+    required this.useRing,
   });
 
   @override
@@ -64,6 +68,7 @@ Future<void> playRight() async {
   void initState() {
     super.initState();
     t = widget.t;
+    countdown = widget.timer;
   }
 
   Future<void> _startRecording() async {
@@ -74,7 +79,7 @@ Future<void> playRight() async {
     isStarting = true;
   });
     
-    await widget.startMeasuring();
+    await widget.startMeasuring(widget.useRing);
     if (widget.playSound) {
       if(widget.soundSide == Side.right) {
         playRight();
@@ -128,6 +133,18 @@ Future<void> playRight() async {
               },
               child: Text(t("Save", "Speichern")),
             ),
+            ElevatedButton(
+              onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SimpleSealCheckScreen(
+                    t: t,
+                    sealCheck: widget.manager.runSealCheck,
+                  ),
+                ),
+              );},
+              child:  Text(t("Sealcheck", "Verschlusstest")))
           ],
         );
       },
@@ -164,7 +181,7 @@ Future<void> playRight() async {
     } else {
       // discard data and reset
       setState(() {
-        countdown = 10;
+        countdown = widget.timer;
       });
 
       debugPrint("Measurement discarded. Ready to remeasure.");}
@@ -179,7 +196,7 @@ Future<void> playRight() async {
   }
 
   void _startTimer() {
-    countdown = 10;
+    countdown = widget.timer;
 
     _timer?.cancel();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {

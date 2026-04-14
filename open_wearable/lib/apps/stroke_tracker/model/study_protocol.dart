@@ -37,15 +37,15 @@ class StudyProtocol {
     ),
   ),
   StudyStep(
-    type: StudyStepType.measuring,
+    type: StudyStepType.measuringHead,
     measuringInstructions: [
       t(
-        "Instruct the patient to start with the head in a neutral position, then turn it to the right, back to neutral, and then to the left.",
-        "Den Patienten anweisen, den Kopf zunächst in die neutrale Position zu bringen, dann nach rechts zu drehen, zurück zur Neutralstellung und anschließend nach links."
+        "Instruct the patient to start with the head in a neutral position, then turn it to the right, back to neutral, and then to the left, and back to neutral.",
+        "Den Patienten anweisen, den Kopf zunächst in die neutrale Position zu bringen, dann nach rechts zu drehen, zurück zur Neutralstellung und anschließend nach links und zurück zur Neutralstellung"
       ),
       t(
-        "Instruct the patient to start with the head in a neutral position, then turn it to the left, back to neutral, and then to the right.",
-        "Den Patienten anweisen, den Kopf zunächst in die neutrale Position zu bringen, dann nach links zu drehen, zurück zur Neutralstellung und anschließend nach rechts."
+        "Instruct the patient to start with the head in a neutral position, then turn it to the left, back to neutral, and then to the right, and back to neutral.",
+        "Den Patienten anweisen, den Kopf zunächst in die neutrale Position zu bringen, dann nach links zu drehen, zurück zur Neutralstellung und anschließend nach rechts und zurück zur Neutralstellung."
       ),
     ],
     repetitions: 3,
@@ -59,7 +59,7 @@ class StudyProtocol {
     ),
   ),
   StudyStep(
-    type: StudyStepType.measuring,
+    type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
         "Instruct the patient to tap the right Earable with the left Hand twice",
@@ -71,7 +71,7 @@ class StudyProtocol {
     repetitions: 1,
   ),
   StudyStep(
-    type: StudyStepType.measuring,
+    type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
         "Instruct the patient to tap the left Earable with the right Hand twice",
@@ -83,7 +83,7 @@ class StudyProtocol {
     repetitions: 1,
   ),
     StudyStep(
-    type: StudyStepType.measuring,
+    type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
         "Instruct the patient to tap the right Earable with the left Hand twice",
@@ -95,7 +95,7 @@ class StudyProtocol {
     repetitions: 1,
   ),
   StudyStep(
-    type: StudyStepType.measuring,
+    type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
         "Instruct the patient to tap the left Earable with the right Hand twice",
@@ -106,7 +106,7 @@ class StudyProtocol {
     soundside: Side.left,
     repetitions: 1,
   ),StudyStep(
-    type: StudyStepType.measuring,
+    type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
         "Instruct the patient to tap the right Earable with the left Hand",
@@ -118,7 +118,7 @@ class StudyProtocol {
     repetitions: 1,
   ),
   StudyStep(
-    type: StudyStepType.measuring,
+    type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
         "Instruct the patient to tap the left Earable with the right Hand twice",

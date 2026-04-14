@@ -4,6 +4,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:face_detection_tflite/face_detection_tflite.dart';
+import 'package:open_wearable/apps/stroke_tracker/controller/manager.dart';
+import 'package:open_wearable/apps/stroke_tracker/view/sealcheck.dart';
 //import 'package:path_provider/path_provider.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
 //import 'package:share_plus/share_plus.dart';
@@ -12,14 +14,15 @@ class CameraMeasuringScreen extends StatefulWidget {
   final int repetitions;
   final int currentRepetition;
   final Future<void> Function() onNext;  
-  final Future<void> Function() startMeasuring;
+  final Future<void> Function(bool useRing) startMeasuring;
   final Future<void> Function() stopMeasuring;
   final Future<void> Function() dispose;
   final String Function(String en,String de) t;
   final FaceDetectorIsolate faceDetector;
   final ExperimentLogger logger;
+  final ExperimentManager manager;
   final String recordingId;
-
+  final bool useRing;
 
   const CameraMeasuringScreen({
     super.key,
@@ -33,6 +36,8 @@ class CameraMeasuringScreen extends StatefulWidget {
     required this.recordingId,
     required this.t,
     required this.dispose,
+    required this.useRing,
+    required this.manager,
   });
 
   @override
@@ -49,7 +54,6 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
   bool isStarting = false;
 
   CameraLensDirection cameraLensDirection = CameraLensDirection.back;
-
   int millisecBetweenRecordedFrames= 250;
 
   int countdown = 10;
@@ -93,7 +97,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
       isStarting = true;
     });
     print("started measurement camera");
-    await widget.startMeasuring();
+    await widget.startMeasuring(widget.useRing);
     DateTime lastLoggedTime = DateTime.now().subtract(Duration(seconds: 1));
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       debugPrint("Kamera nicht bereit für Aufnahme.");
@@ -228,6 +232,18 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
               },
               child: Text(t("Save", "Speichern")),
             ),
+            ElevatedButton(
+              onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SimpleSealCheckScreen(
+                    t: t,
+                    sealCheck: widget.manager.runSealCheck,
+                  ),
+                ),
+              );},
+              child:  Text(t("Sealcheck", "Verschlusstest")))
           ],
         );
       },
