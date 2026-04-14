@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
-import 'package:open_wearable/apps/stroke_tracker/model/study_protocol.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/repetition_screen.dart';
 
 class EarbudSealTestScreen extends StatefulWidget {
@@ -158,9 +156,6 @@ Widget build(BuildContext context) {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(widget.heading,
-                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 24),
                     Text(widget.t("Upcoming Task:", "Aufkommende Aufgabe:"),
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
@@ -242,5 +237,4 @@ Widget build(BuildContext context) {
     ),
   );
 }
-
 }

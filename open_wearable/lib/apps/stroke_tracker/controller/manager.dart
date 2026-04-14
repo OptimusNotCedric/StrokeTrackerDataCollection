@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:open_earable_flutter/open_earable_flutter.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/config.dart';
@@ -12,7 +9,6 @@ import 'package:path_provider/path_provider.dart';
 
 class ExperimentManager extends ChangeNotifier{
   final ExperimentLogger logger;
-  late AudioPlayer _player;
   final ExperimentConfig expConfig;
   final OpenEarableV2 leftWearable;
   final OpenEarableV2 rightWearable;

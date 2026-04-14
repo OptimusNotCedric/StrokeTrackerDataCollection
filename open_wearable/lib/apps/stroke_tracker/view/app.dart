@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/study_selector.dart';
 import 'package:open_wearable/apps/widgets/select_earable_view.dart';
-import 'package:open_wearable/apps/widgets/select_two_earable_view.dart';
+
 
 class StrokeTrackerView extends StatelessWidget {
   const StrokeTrackerView({super.key});
