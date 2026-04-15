@@ -88,7 +88,7 @@ class _StudyRunnerState extends State<StudyRunner> {
       SensorConfig(sensor: "imu", sampleRate: 50),
       SensorConfig(sensor: "pressure", sampleRate: 50),
       SensorConfig(sensor: "microphone", sampleRate: 48000),
-      //SensorConfig(sensor: "ppg", sampleRate: 50),
+      SensorConfig(sensor: "ppg", sampleRate: 50),
       SensorConfig(sensor: "bone_conduction", sampleRate: 1600),
       //SensorConfig(sensor: "temperature", sampleRate: 8),
     ];
@@ -114,7 +114,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     final step = _steps[_currentIndex];
     // final date = DateTime.now().toIso8601String().replaceAll(':', '-');
     final recordingId = 
-        "${widget.protocol.sessionId.replaceAll(':', '-')}_rep_${_repetitionCounter}_Step_${_currentIndex}_";
+        "${widget.protocol.sessionId.replaceAll(':', '-')}_Step_${_currentIndex}_rep_${_repetitionCounter}_";
 
     await _logger.startLogging(false, widget.protocol.sessionId);
     _logger.logTaskStart(_currentIndex, step.heading);

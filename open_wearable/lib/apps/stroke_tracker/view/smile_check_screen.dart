@@ -54,7 +54,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
   bool isStarting = false;
 
   CameraLensDirection cameraLensDirection = CameraLensDirection.back;
-  int millisecBetweenRecordedFrames= 250;
+  int millisecBetweenRecordedFrames= 50;
 
   int countdown = 10;
   Timer? _timer;

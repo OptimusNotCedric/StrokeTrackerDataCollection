@@ -322,10 +322,11 @@ class ExperimentLogger extends ChangeNotifier{
 
   static String boundingBoxToString(BoundingBox box) {
     return [
-      [box.topLeft.x, box.topLeft.y].join(';'),
-      [box.topRight.x, box.topRight.y].join(';'),
-      [box.bottomLeft.x, box.bottomLeft.y].join(';'),
-      [box.bottomRight.x, box.bottomRight.y].join(';'),
+      [box.topLeft.x,box.topLeft.y,
+      box.topRight.x,box.topRight.y,
+      box.bottomLeft.x,box.bottomLeft.y,
+      box.bottomRight.x,box.bottomRight.y]
+      
     ].join(',');
   }
 
@@ -339,7 +340,7 @@ class ExperimentLogger extends ChangeNotifier{
       point.add(p.x.toString());
       point.add(p.y.toString());
       point.add(p.z.toString());
-      values.add("(${point.join(';')})");
+      values.add(point.join(','));
       point = [];
     }
 
@@ -377,16 +378,16 @@ class ExperimentLogger extends ChangeNotifier{
       header.add("TimeStamp");
       header.add("Imagewidth");
       header.add("Imageheight");
-      header.add("box.left,box.top,box.right,box.bottom");
+      header.add("box.left_x,box.left_y,box.top_x,box.top_y,box.right_x,box.right_y,box.bottom_x,box.bottom_y");
       
-      for (int i = 0; i < faces.length; i++) {
-        header.add("Point $i x;y;z");
+      for (int i = 0; i < 468; i++) {
+        header.add("${i}_x,${i}_y,${i}_z");
       }
-      await file.writeAsString(header.join(","));
+      await file.writeAsString('${header.join(",")}\n');
     }
     // append correctly
     final sink = file.openWrite(mode: FileMode.append);
-
+    
     for (final row in csvRows) {
       sink.writeln(row);
     }

@@ -429,7 +429,7 @@ class ExperimentManager extends ChangeNotifier{
   }
   
   Future<Map<String, dynamic>?> runSealCheck(bool isLeft) async {
-    OpenEarableV2 wearable = isLeft ? leftWearable:rightWearable;
+    OpenEarableV2 wearable = isLeft ? leftWearable : rightWearable;
     Map<String, dynamic>? data;
     try {
       
