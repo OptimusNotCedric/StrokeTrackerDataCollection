@@ -139,6 +139,11 @@ class _StudyRunnerState extends State<StudyRunner> {
     await _logger.stopAndWriteLogging(false);
     final currentStep = _steps[_currentIndex];
     final maxRepetitions = currentStep.repetitions;
+    setState(() {
+      if (_steps[_currentIndex].type != StudyStepType.instruction) {
+        _stepsDone = _stepsDone + 1;
+      }
+    });
     await Navigator.push(context, 
     MaterialPageRoute(
     builder: (context) => TaskScreen(
@@ -157,12 +162,8 @@ class _StudyRunnerState extends State<StudyRunner> {
     ),
     );
     setState(() {
-      if (_steps[_currentIndex].type != StudyStepType.instruction) {
-        _stepsDone = _stepsDone + 1;
-      }
-      print("advancing");
-      print(_steps[_currentIndex].type.name);
-      print(_stepsDone);
+      
+      
       if (_repetitionCounter < maxRepetitions) {
         // weitere Wiederholung des gleichen Schritts
         print("repeat step");
