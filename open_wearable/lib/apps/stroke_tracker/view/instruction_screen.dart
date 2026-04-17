@@ -196,7 +196,7 @@ Widget build(BuildContext context) {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${widget.t("Step", "Schritt")} ${widget.currentStepNumber} / $totalSteps'),
+            Text('${widget.t("Step", "Schritt")} ${widget.stepsDone} / ${widget.stepsTotal}'),
             const SizedBox(height: 4),
             LinearProgressIndicator(
               value: progress,

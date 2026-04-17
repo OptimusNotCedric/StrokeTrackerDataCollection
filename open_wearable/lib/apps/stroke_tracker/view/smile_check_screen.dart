@@ -13,7 +13,8 @@ import 'package:opencv_dart/opencv_dart.dart' as cv;
 class CameraMeasuringScreen extends StatefulWidget {
   final int repetitions;
   final int currentRepetition;
-  final Future<void> Function() onNext;  
+  final Future<void> Function() onNext;
+  final Future<void> Function() onLeaveStudy;
   final Future<void> Function(bool useRing) startMeasuring;
   final Future<void> Function() stopMeasuring;
   final Future<void> Function() dispose;
@@ -28,6 +29,7 @@ class CameraMeasuringScreen extends StatefulWidget {
     super.key,
     required this.repetitions,
     required this.onNext,
+    required this.onLeaveStudy,
     required this.startMeasuring,
     required this.stopMeasuring,
     required this.currentRepetition,
@@ -64,6 +66,37 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
     super.initState();
     t = widget.t;
     _initCamera();
+  }
+
+  Future<void> _onLeavePressed() async {
+    final shouldLeave = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(t("Leave Study", "Studie verlassen")),
+          content: Text(
+            t(
+              "Are you sure you want to leave? Your progress may be lost.",
+              "Sind Sie sicher, dass Sie die Studie verlassen möchten? Ihr Fortschritt könnte verloren gehen.",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(t("Cancel", "Abbrechen")),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(t("Leave", "Verlassen")),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldLeave == true) {
+      widget.onLeaveStudy();
+    }
   }
 
   Future<void> _initCamera() async {

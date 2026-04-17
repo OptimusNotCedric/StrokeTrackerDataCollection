@@ -156,8 +156,11 @@ class _StudyRunnerState extends State<StudyRunner> {
     );
     setState(() {
       if (_steps[_currentIndex].type != StudyStepType.instruction) {
-        _stepsDone = _stepsDone +1;
+        _stepsDone = _stepsDone + 1;
       }
+      print("advancing");
+      print(_steps[_currentIndex].type.name);
+      print(_stepsDone);
       if (_repetitionCounter < maxRepetitions) {
         // weitere Wiederholung des gleichen Schritts
         print("repeat step");
@@ -253,7 +256,8 @@ class _StudyRunnerState extends State<StudyRunner> {
 
         if (step.type == StudyStepType.cameraMeasurement) {
           return CameraMeasuringScreen(
-            currentRepetition: _repetitionCounter, 
+            currentRepetition: _repetitionCounter,
+            onLeaveStudy: _leaveStudy,
             repetitions: step.repetitions, 
             onNext: _saveAndAdvance, 
             startMeasuring: _startMeasuring, 
