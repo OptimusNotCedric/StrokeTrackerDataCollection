@@ -110,35 +110,35 @@ class _TaskScreenState extends State<TaskScreen> {
   }
 
   Future<void> _onLeavePressed() async {
-  final shouldLeave = await showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text(t("Leave Study", "Studie verlassen")),
-        content: Text(
-          t(
-            "Are you sure you want to leave? Your progress may be lost.",
-            "Sind Sie sicher, dass Sie die Studie verlassen möchten? Ihr Fortschritt könnte verloren gehen.",
+    final shouldLeave = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(t("Leave Study", "Studie verlassen")),
+          content: Text(
+            t(
+              "Are you sure you want to leave? Your progress may be lost.",
+              "Sind Sie sicher, dass Sie die Studie verlassen möchten? Ihr Fortschritt könnte verloren gehen.",
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(t("Cancel", "Abbrechen")),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(t("Leave", "Verlassen")),
-          ),
-        ],
-      );
-    },
-  );
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(t("Cancel", "Abbrechen")),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(t("Leave", "Verlassen")),
+            ),
+          ],
+        );
+      },
+    );
 
-  if (shouldLeave == true) {
-    widget.onLeaveStudy();
+    if (shouldLeave == true) {
+      widget.onLeaveStudy();
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
