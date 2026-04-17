@@ -6,18 +6,22 @@ import 'package:open_wearable/apps/stroke_tracker/view/repetition_screen.dart';
 class EarbudSealTestScreen extends StatefulWidget {
   final String heading;
   final String description;
+  final Future<void> Function() onLeaveStudy;
   final String Function(String en, String de) t;
   final Future<Map<String, dynamic>?> Function(bool isLeft) sealCheck;
   final ExperimentLogger logger;
   final VoidCallback onNext;
-  final VoidCallback onLeaveStudy;
   final int currentStepNumber;
   final int currentRepetitionNumber;
   final String sessionId;
+  final int stepsDone;
+  final int stepsTotal;
 
   const EarbudSealTestScreen({
     super.key,
     required this.heading,
+    required this.stepsDone,
+    required this.stepsTotal,
     required this.description,
     required this.t,
     required this.onNext,
@@ -27,6 +31,7 @@ class EarbudSealTestScreen extends StatefulWidget {
     required this.currentRepetitionNumber,
     required this.currentStepNumber,
     required this.sessionId,
+  
   });
 
   @override
@@ -39,9 +44,6 @@ class _EarbudSealTestScreenState extends State<EarbudSealTestScreen> {
 
   bool isMeasuringLeft = false;
   bool isMeasuringRight = false;
-
-  // Simulated seal check data
-  
 
   void checkSeal(Side side) async{
     setState(() {
@@ -68,6 +70,36 @@ class _EarbudSealTestScreenState extends State<EarbudSealTestScreen> {
 
   }
 
+  Future<void> _onLeavePressed() async {
+    final shouldLeave = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(widget.t("Leave Study", "Studie verlassen")),
+          content: Text(
+            widget.t(
+              "Are you sure you want to leave? Your progress may be lost.",
+              "Sind Sie sicher, dass Sie die Studie verlassen möchten? Ihr Fortschritt könnte verloren gehen.",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(widget.t("Cancel", "Abbrechen")),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(widget.t("Leave", "Verlassen")),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldLeave == true) {
+      widget.onLeaveStudy();
+    }
+  }
   void resetResults() {
     setState(() {
       leftResult = null;
@@ -88,8 +120,17 @@ class _EarbudSealTestScreenState extends State<EarbudSealTestScreen> {
 
   Widget _buildResultCard(Map<String, dynamic> result) {
   final theme = Theme.of(context);
-  final int quality = result['quality'] ?? -1;
+  double quality = 0;
 
+  Map<String, dynamic>? firstPeak;
+  if (result['points'].isNotEmpty) {
+    firstPeak = result['points'].first.cast<String, dynamic>();
+  
+    (firstPeak!['magnitude'] as num?)?.toDouble() == null ? null :  quality = (firstPeak!['magnitude'] as num?)!.toDouble();
+  } else {
+    firstPeak = null; // or provide a default
+  }
+  
   return Card(
     child: Padding(
       padding: const EdgeInsets.all(16),
@@ -100,7 +141,7 @@ class _EarbudSealTestScreenState extends State<EarbudSealTestScreen> {
             style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           Text(
-            '$quality / 100',
+            widget.t('Quality should be above 100. Quality: $quality', 'Qualität sollte über 100 sein. Qualität: $quality'),
             style: theme.textTheme.bodyMedium,
           ),
         ],
@@ -114,7 +155,7 @@ class _EarbudSealTestScreenState extends State<EarbudSealTestScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ElevatedButton(
-          onPressed: isMeasuring ? null : () => checkSeal(side),
+          onPressed: (isMeasuringLeft || isMeasuringRight) ? null : () => checkSeal(side),
           child: Text(widget.t(
             side == Side.left ? "Check Left Earbud" : "Check Right Earbud",
             side == Side.left ? "Linkes Ohr prüfen" : "Rechtes Ohr prüfen",
@@ -144,9 +185,34 @@ class _EarbudSealTestScreenState extends State<EarbudSealTestScreen> {
 Widget build(BuildContext context) {
   final bool canContinue = leftResult != null && rightResult != null;
 
+  final int totalSteps = 10; // Replace with your total steps count
+  final double progress = widget.currentStepNumber / totalSteps;
+
   return PopScope(
     canPop: false,
     child: Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${widget.t("Step", "Schritt")} ${widget.currentStepNumber} / $totalSteps'),
+            const SizedBox(height: 4),
+            LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.grey[300],
+              color: Colors.blue,
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.exit_to_app),
+            onPressed: _onLeavePressed,
+          ),
+
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(

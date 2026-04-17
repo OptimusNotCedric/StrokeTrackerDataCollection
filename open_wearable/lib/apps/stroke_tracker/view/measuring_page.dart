@@ -10,7 +10,8 @@ import 'package:open_wearable/apps/stroke_tracker/view/sealcheck.dart';
 class MeasuringScreen extends StatefulWidget {
   final int repetitions;
   final int currentRepetition;
-  final Future<void> Function() onNext;  
+  final Future<void> Function() onNext;
+  final Future<void> Function() onLeaveStudy;
   final Future<void> Function(bool useRing) startMeasuring;
   final Future<void> Function() stopMeasuring;
   final Future<void> Function() dispose;
@@ -27,6 +28,7 @@ class MeasuringScreen extends StatefulWidget {
 
   const MeasuringScreen({
     super.key,
+    required this.onLeaveStudy,
     required this.repetitions,
     required this.onNext,
     required this.startMeasuring,
@@ -59,6 +61,37 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   Future<void> playLeft() async {
   await widget.manager.playSound(left:true);
 }
+
+  Future<void> _onLeavePressed() async {
+    final shouldLeave = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(t("Leave Study", "Studie verlassen")),
+          content: Text(
+            t(
+              "Are you sure you want to leave? Your progress may be lost.",
+              "Sind Sie sicher, dass Sie die Studie verlassen möchten? Ihr Fortschritt könnte verloren gehen.",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(t("Cancel", "Abbrechen")),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(t("Leave", "Verlassen")),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldLeave == true) {
+      widget.onLeaveStudy();
+    }
+  }
 
 Future<void> playRight() async {
   await widget.manager.playSound(left:false);
@@ -187,6 +220,8 @@ Future<void> playRight() async {
       debugPrint("Measurement discarded. Ready to remeasure.");}
   }
 
+  
+
   @override
   void dispose() {
     widget.stopMeasuring();
@@ -216,6 +251,16 @@ Future<void> playRight() async {
     return PopScope(
       canPop: false,
       child: Scaffold(
+        appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.exit_to_app),
+            onPressed: _onLeavePressed,
+          ),
+
+        ],
+      ),
         backgroundColor: Colors.white,
         body: SafeArea(
           child: Column(

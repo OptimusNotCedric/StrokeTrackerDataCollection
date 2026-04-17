@@ -50,6 +50,8 @@ class _StudyRunnerState extends State<StudyRunner> {
   late final List<StudyStep> _steps;
   int _currentIndex = 0;
   
+  int _stepsDone = 0;
+  late final int _stepsTotal;
   int _repetitionCounter = 1;
   late final FaceDetectorIsolate _faceDetectorIsolate;
   /// Zählt echte Mess-Schritte (1,2,3...)
@@ -65,6 +67,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     super.initState();
     _loadConfigureFaceDetector();
     _steps = widget.protocol.getSteps();
+    _stepsTotal = widget.protocol.stepsTotal();
     _logger = ExperimentLogger();
     _loadingFuture = _loadConfigAndInitManager();
   }
@@ -152,7 +155,9 @@ class _StudyRunnerState extends State<StudyRunner> {
     ),
     );
     setState(() {
-
+      if (_steps[_currentIndex].type != StudyStepType.instruction) {
+        _stepsDone = _stepsDone +1;
+      }
       if (_repetitionCounter < maxRepetitions) {
         // weitere Wiederholung des gleichen Schritts
         print("repeat step");
@@ -231,6 +236,8 @@ class _StudyRunnerState extends State<StudyRunner> {
         final step = _steps[_currentIndex];
         if (step.type == StudyStepType.instruction) {
           return EarbudSealTestScreen(
+            stepsDone: _stepsDone,
+            stepsTotal: _stepsTotal,
             sessionId: widget.protocol.sessionId,
             logger: _logger,
             heading: step.heading,
@@ -267,7 +274,8 @@ class _StudyRunnerState extends State<StudyRunner> {
         
         if ( step.type == StudyStepType.measuringTap) {
           return MeasuringScreen(
-            repetitions: step.repetitions, 
+            repetitions: step.repetitions,
+            onLeaveStudy: _leaveStudy, 
             onNext: _saveAndAdvance, 
             startMeasuring: _startMeasuring, 
             stopMeasuring: _stopAndConfirm, 
@@ -289,7 +297,8 @@ class _StudyRunnerState extends State<StudyRunner> {
         if (step.type == StudyStepType.measuringHead) {
           
           return MeasuringScreen(
-            repetitions: step.repetitions, 
+            repetitions: step.repetitions,
+            onLeaveStudy: _leaveStudy,
             onNext: _saveAndAdvance, 
             startMeasuring: _startMeasuring, 
             stopMeasuring: _stopAndConfirm, 

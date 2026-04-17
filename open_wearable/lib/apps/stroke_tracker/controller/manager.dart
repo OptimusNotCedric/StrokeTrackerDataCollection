@@ -277,7 +277,7 @@ class ExperimentManager extends ChangeNotifier{
               }
 
               },
-              onDone: () async => await _leftSubscription?.cancel(),
+              onDone: () async => _leftSubscription?.cancel(),
               onError: (error) async {
                 print('Right streaming error: $error');
                 await _leftSubscription?.cancel();
@@ -298,7 +298,7 @@ class ExperimentManager extends ChangeNotifier{
                 print("Right sensor started");
                 logger.logSyncRightEvent(value.timestamp);
               }},
-              onDone: () async => await _rightSubscription?.cancel(),
+              onDone: () async => _rightSubscription?.cancel(),
               onError: (error) async {
                 print('Right streaming error: $error');
                 await _rightSubscription?.cancel();
@@ -308,11 +308,17 @@ class ExperimentManager extends ChangeNotifier{
         }
       }
     
-    await Future.wait([
+    if (useRing) {
+      await Future.wait([
       _leftReady!.future,
       _rightReady!.future,
       _ringReady!.future,
     ]);
+    } else {
+    await Future.wait([
+      _leftReady!.future,
+      _rightReady!.future,
+    ]);}
 
     String leftSelectedCfgsString = leftSelectedCfgs.map(
       (entry) {

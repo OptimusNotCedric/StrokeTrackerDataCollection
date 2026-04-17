@@ -15,13 +15,22 @@ class StudyProtocol {
 
   String t(String en, String de) => isEnglish ? en : de;
 
+  int stepsTotal () {
+    int total = 0;
+    for (StudyStep step in getSteps()) {
+      if (step.type != StudyStepType.instruction){
+        total = total + step.repetitions;
+      }
+    }
+    return total;
+  }
   List<StudyStep> getSteps() => [
   StudyStep(
     type: StudyStepType.instruction,
     heading: t("Smiling", "Lächeln"),
     description: t(
-      "During the recording let the patient smile",
-      "Während der Aufnahme soll der Patient lächeln"
+      "After pressing the start-button, wait until the countdown starts, after the countdown starts instruct the patient to smile",
+      "„Drücken Sie den Start-Knopf, warten Sie, bis der Countdown beginnt, und sobald der Countdown startet, weisen Sie den Patienten an, zu lächeln.“"
     ),
   ),
   StudyStep(
@@ -32,8 +41,8 @@ class StudyProtocol {
     type: StudyStepType.instruction,
     heading: t("Turn Head", "Kopf drehen"),
     description: t(
-      "During the recording turn your head",
-      "Während der Aufnahme den Kopf drehen"
+      "During the recording the patient needs to turn the head",
+      "Während der Aufnahme soll der patient den Kopf drehen"
     ),
   ),
   StudyStep(
@@ -54,16 +63,16 @@ class StudyProtocol {
     type: StudyStepType.instruction,
     heading: t("Tap Earables", "Earables antippen"),
     description: t(
-      "During the recording tap twice one earable with the opposing arm twice",
-      "Während der Aufnahme ein Earable mit dem gegenüberliegenden Arm zweimal antippen"
+      "During the recording double-tap one earable with the opposing arm twice",
+      "Während der Aufnahme ein Earable mit dem gegenüberliegenden Arm zweimal schnell hintereinander antippen"
     ),
   ),
   StudyStep(
     type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
-        "Instruct the patient to tap the right Earable with the left Hand twice",
-        "Den Patienten anweisen, das rechte Earable mit der linken Hand zweimal anzutippen"
+        "Instruct the patient double-tap the right Earable with the left Hand twice",
+        "Den Patienten anweisen, das rechte Earable mit der linken Hand zweimal schnell hintereinander anzutippen"
       ),
     ],
     playSound: true,
@@ -74,8 +83,8 @@ class StudyProtocol {
     type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
-        "Instruct the patient to tap the left Earable with the right Hand twice",
-        "Den Patienten anweisen, das linke Earable mit der rechten Hand zweimal anzutippen"
+        "Instruct the patient double-tap the left Earable with the right Hand twice",
+        "Den Patienten anweisen, das linke Earable mit der rechten Hand zweimal schnell hintereinander anzutippen"
       ),
     ],
     playSound: true,
@@ -86,8 +95,8 @@ class StudyProtocol {
     type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
-        "Instruct the patient to tap the right Earable with the left Hand twice",
-        "Den Patienten anweisen, das rechte Earable mit der linken Hand zweimal anzutippen"
+        "Instruct the patient double-tap the right Earable with the left Hand twice",
+        "Den Patienten anweisen, das rechte Earable mit der linken Hand zweimal schnell hintereinander anzutippen"
       ),
     ],
     playSound: true,
@@ -98,8 +107,8 @@ class StudyProtocol {
     type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
-        "Instruct the patient to tap the left Earable with the right Hand twice",
-        "Den Patienten anweisen, das linke Earable mit der rechten Hand zweimal anzutippen"
+        "Instruct the patient double-tap the left Earable with the right Hand twice",
+        "Den Patienten anweisen, das linke Earable mit der rechten Hand zweimal schnell hintereinander anzutippen"
       ),
     ],
     playSound: true,
@@ -109,8 +118,8 @@ class StudyProtocol {
     type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
-        "Instruct the patient to tap the right Earable with the left Hand",
-        "Den Patienten anweisen, das rechte Earable mit der linken Hand zweimal anzutippen"
+        "Instruct the patient double-tap the right Earable with the left Hand",
+        "Den Patienten anweisen, das rechte Earable mit der linken Hand zweimal schnell hintereinander anzutippen"
       ),
     ],
     playSound: true,
@@ -121,8 +130,8 @@ class StudyProtocol {
     type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
-        "Instruct the patient to tap the left Earable with the right Hand twice",
-        "Den Patienten anweisen, das linke Earable mit der rechten Hand zweimal anzutippen"
+        "Instruct the patient double-tap the left Earable with the right Hand twice",
+        "Den Patienten anweisen, das linke Earable mit der rechten Hand zweimal schnell hintereinander anzutippen"
       ),
     ],
     playSound: true,

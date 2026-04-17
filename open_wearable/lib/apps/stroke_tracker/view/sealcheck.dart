@@ -25,8 +25,11 @@ class _SimpleSealCheckScreenState extends State<SimpleSealCheckScreen> {
 
   void checkSeal(Side side) async {
     setState(() {
-      if (side == Side.left) isMeasuringLeft = true;
-      else isMeasuringRight = true;
+      if (side == Side.left) {
+        isMeasuringLeft = true;
+      } else {
+        isMeasuringRight = true;
+      }
     });
 
     final result = await widget.sealCheck(side == Side.left);
@@ -52,7 +55,15 @@ class _SimpleSealCheckScreenState extends State<SimpleSealCheckScreen> {
   }
 
   Widget _buildResultCard(Map<String, dynamic> result) {
-    final int quality = result['quality'] ?? -1;
+    Map<String, dynamic>? firstPeak;
+    double quality = 0;
+    if (result['points'].isNotEmpty) {
+      firstPeak = result['points'].first.cast<String, dynamic>();
+    
+      (firstPeak!['magnitude'] as num?)?.toDouble() == null ? null :  quality = (firstPeak!['magnitude'] as num?)!.toDouble();
+    } else {
+      firstPeak = null; // or provide a default
+    }
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -60,7 +71,7 @@ class _SimpleSealCheckScreenState extends State<SimpleSealCheckScreen> {
           children: [
             Text(widget.t('Quality', 'Qualität') + ': ',
                 style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text('$quality / 100'),
+            Text( widget.t('Quality should be above 100. Quality: $quality', 'Qualität sollte über 100 sein. Qualität: $quality'),),
           ],
         ),
       ),
@@ -72,7 +83,7 @@ class _SimpleSealCheckScreenState extends State<SimpleSealCheckScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ElevatedButton(
-          onPressed: isMeasuring ? null : () => checkSeal(side),
+          onPressed: (isMeasuringLeft || isMeasuringRight) ? null : () => checkSeal(side),
           child: Text(widget.t(
               side == Side.left ? "Check Left Earbud" : "Check Right Earbud",
               side == Side.left ? "Linkes Ohr prüfen" : "Rechtes Ohr prüfen")),

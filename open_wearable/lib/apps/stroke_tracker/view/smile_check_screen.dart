@@ -105,7 +105,6 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
     }
     
     setState(() {
-      recording = true;
       isStarting = false;
     });
     try {
@@ -532,8 +531,8 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
               ),
               Center(
                 child: Container(
-                  width: 450,
-                  height: 500,
+                  width: 300,
+                  height: 350,
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.greenAccent, width: 3),
                     borderRadius: BorderRadius.circular(20),
