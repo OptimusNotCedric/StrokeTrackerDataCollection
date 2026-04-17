@@ -142,6 +142,8 @@ class _StudyRunnerState extends State<StudyRunner> {
     await Navigator.push(context, 
     MaterialPageRoute(
     builder: (context) => TaskScreen(
+      stepsDone: _stepsDone,
+      stepsTotal: _stepsTotal,
       manager: _manager,
       maxRepetition: maxRepetitions, 
       currentRepetition: _repetitionCounter, 
@@ -279,6 +281,8 @@ class _StudyRunnerState extends State<StudyRunner> {
         if ( step.type == StudyStepType.measuringTap) {
           return MeasuringScreen(
             repetitions: step.repetitions,
+            stepsDone: _stepsDone,
+            stepsTotal: _stepsTotal,
             onLeaveStudy: _leaveStudy, 
             onNext: _saveAndAdvance, 
             startMeasuring: _startMeasuring, 
@@ -301,6 +305,8 @@ class _StudyRunnerState extends State<StudyRunner> {
         if (step.type == StudyStepType.measuringHead) {
           
           return MeasuringScreen(
+            stepsDone: _stepsDone,
+            stepsTotal: _stepsTotal,
             repetitions: step.repetitions,
             onLeaveStudy: _leaveStudy,
             onNext: _saveAndAdvance, 

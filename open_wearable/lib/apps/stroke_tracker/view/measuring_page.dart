@@ -25,6 +25,8 @@ class MeasuringScreen extends StatefulWidget {
   final ExperimentManager manager;
   final int timer;
   final bool useRing;
+  final int stepsDone;
+  final int stepsTotal;
 
   const MeasuringScreen({
     super.key,
@@ -45,6 +47,8 @@ class MeasuringScreen extends StatefulWidget {
     required this.manager,
     required this.timer,
     required this.useRing,
+    required this.stepsTotal,
+    required this.stepsDone,
   });
 
   @override
@@ -253,6 +257,18 @@ Future<void> playRight() async {
       child: Scaffold(
         appBar: AppBar(
         automaticallyImplyLeading: false,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${widget.t("Step", "Schritt")} ${widget.stepsDone} / ${widget.stepsTotal}'),
+            const SizedBox(height: 4),
+            LinearProgressIndicator(
+              value: widget.stepsDone/widget.stepsTotal,
+              backgroundColor: Colors.grey[300],
+              color: Colors.blue,
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.exit_to_app),

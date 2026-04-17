@@ -75,6 +75,8 @@ class TaskScreen extends StatefulWidget{
   final String currentStepTask;
   final ExperimentLogger logger;
   final ExperimentManager manager;
+  final int stepsDone;
+  final int stepsTotal;
   final Future<void> Function() onLeaveStudy;
   final String Function(String en,String de) translate;
 
@@ -88,6 +90,8 @@ class TaskScreen extends StatefulWidget{
     required this.currentStepTask,
     required this.translate,
     required this.manager,
+    required this.stepsDone,
+    required this.stepsTotal,
   });
 
   @override
@@ -146,7 +150,18 @@ class _TaskScreenState extends State<TaskScreen> {
       canPop: false,
     child: Scaffold(
       appBar: AppBar(
-        title: Text(t("Repetition Task", "Wiederholungsaufgabe")),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${t("Step", "Schritt")} ${widget.stepsDone} / ${widget.stepsTotal}'),
+            const SizedBox(height: 4),
+            LinearProgressIndicator(
+              value: widget.stepsDone/widget.stepsTotal,
+              backgroundColor: Colors.grey[300],
+              color: Colors.blue,
+            ),
+          ],
+        ),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(

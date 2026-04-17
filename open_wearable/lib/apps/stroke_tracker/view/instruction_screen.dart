@@ -185,9 +185,6 @@ class _EarbudSealTestScreenState extends State<EarbudSealTestScreen> {
 Widget build(BuildContext context) {
   final bool canContinue = leftResult != null && rightResult != null;
 
-  final int totalSteps = 10; // Replace with your total steps count
-  final double progress = widget.currentStepNumber / totalSteps;
-
   return PopScope(
     canPop: false,
     child: Scaffold(
@@ -199,7 +196,7 @@ Widget build(BuildContext context) {
             Text('${widget.t("Step", "Schritt")} ${widget.stepsDone} / ${widget.stepsTotal}'),
             const SizedBox(height: 4),
             LinearProgressIndicator(
-              value: progress,
+              value: widget.stepsDone/widget.stepsTotal,
               backgroundColor: Colors.grey[300],
               color: Colors.blue,
             ),
