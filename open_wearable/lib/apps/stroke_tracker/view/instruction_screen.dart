@@ -325,10 +325,6 @@ Widget _buildResultCard(String label, Map<String, dynamic> result) {
 
     firstPeak = result['points'].first.cast<String, dynamic>();
 
-
-  
-
-
     (firstPeak!['magnitude'] as num?)?.toDouble() == null ? null :  quality = (firstPeak!['magnitude'] as num?)!.toInt();
 
 

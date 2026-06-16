@@ -245,6 +245,7 @@ class ExperimentManager extends ChangeNotifier{
       }
       List<SensorConfigurationValue> values = ringSensorCfgProvider.getSensorConfigurationValues(configuration, distinct: true);
       ringSensorCfgProvider.addSensorConfiguration(configuration, values.first);
+      print("#+#+#+##+####+## value: ${values.first} config: $configuration");
       configuration.setConfiguration(ringSensorCfgProvider.getSelectedConfigurationValue(configuration)!);
     }
 

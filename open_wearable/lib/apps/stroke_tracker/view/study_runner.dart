@@ -57,8 +57,8 @@ class _StudyRunnerState extends State<StudyRunner> {
   String currentInstruction = "";
   int _stepsDone = 0;
   int _stepsTotal = 0;
+
   late final FaceDetectorIsolate _faceDetectorIsolate;
-  /// Zählt echte Mess-Schritte (1,2,3...)
 
   late final ExperimentManager _manager;
   late final ExperimentLogger _logger;
@@ -98,7 +98,7 @@ class _StudyRunnerState extends State<StudyRunner> {
     final sensorConfigs = [
       SensorConfig(sensor: "imu", sampleRate: 50),
       SensorConfig(sensor: "pressure", sampleRate: 50),
-      SensorConfig(sensor: "microphone", sampleRate: 48000),
+      //SensorConfig(sensor: "microphone", sampleRate: 48000),
       SensorConfig(sensor: "ppg", sampleRate: 50),
       SensorConfig(sensor: "bone_conduction", sampleRate: 1600),
       //SensorConfig(sensor: "temperature", sampleRate: 8),
@@ -218,7 +218,7 @@ class _StudyRunnerState extends State<StudyRunner> {
           
           return;
         }
-      if (currentStep.repetitionsDone < maxRepetitions) {
+      if (currentStep.repetitionsDone <= maxRepetitions) {
         // weitere Wiederholung des gleichen Schritts
       } else {
         _testSelection();
