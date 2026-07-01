@@ -37,6 +37,7 @@ class StudySelection extends StatefulWidget {
 class _StudySelectionState extends State<StudySelection> {
   final TextEditingController _controller = TextEditingController();
   bool isEnglish = false;
+  int participantIdlength = 10;
 
   @override
   void initState() {
@@ -147,6 +148,11 @@ class _StudySelectionState extends State<StudySelection> {
               const SizedBox(height: 20),
               TextField(
                 controller: _controller,
+                maxLength:participantIdlength,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(participantIdlength),
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+                ],
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: isEnglish ? 'Participant ID' : 'Probanden-ID',

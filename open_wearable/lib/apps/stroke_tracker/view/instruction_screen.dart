@@ -313,26 +313,14 @@ Widget _buildActionCard({
 }
 Widget _buildResultCard(String label, Map<String, dynamic> result) {
   int quality = 0;
-
-
-
-
   Map<String, dynamic>? firstPeak;
 
-
-  if (result['points'].isNotEmpty) {
-
-
-    firstPeak = result['points'].first.cast<String, dynamic>();
-
-    (firstPeak!['magnitude'] as num?)?.toDouble() == null ? null :  quality = (firstPeak!['magnitude'] as num?)!.toInt();
-
-
+  if (result['quality'] != null) {
+    quality = (result['quality'] as num).toInt();
   } else {
-
-
     firstPeak = null;
   }
+
   return Card(
     color: Colors.green.shade50,
     child: ListTile(

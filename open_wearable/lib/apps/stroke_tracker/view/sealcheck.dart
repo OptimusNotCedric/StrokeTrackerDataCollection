@@ -55,15 +55,13 @@ class _SimpleSealCheckScreenState extends State<SimpleSealCheckScreen> {
   }
 
   Widget _buildResultCard(Map<String, dynamic> result) {
-    Map<String, dynamic>? firstPeak;
     double quality = 0;
-    if (result['points'].isNotEmpty) {
-      firstPeak = result['points'].first.cast<String, dynamic>();
+    print(result);
+    print(leftResult);
+    if (result['quality'].isNotEmpty) {
+      quality = result['quality'].first.cast<String, dynamic>();
     
-      (firstPeak!['magnitude'] as num?)?.toDouble() == null ? null :  quality = (firstPeak!['magnitude'] as num?)!.toDouble();
-    } else {
-      firstPeak = null; // or provide a default
-    }
+    } 
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
