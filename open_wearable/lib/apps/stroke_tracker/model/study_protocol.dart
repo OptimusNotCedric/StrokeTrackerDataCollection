@@ -5,13 +5,15 @@ class StudyProtocol {
   late String sessionId;
   bool isEnglish = false;
 
-  void addParticipantId(String id){
-    participantId  = id;
+  void addParticipantId(String id) {
+    participantId = id;
   }
 
   void addSessionId(String id) {
-    sessionId = id.replaceAll(':', '-');
+    sessionId = "${participantId}_$id".replaceAll(':', '-');
   }
+
+
 
   String t(String en, String de) => isEnglish ? en : de;
 
