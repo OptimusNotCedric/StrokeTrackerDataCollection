@@ -466,6 +466,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
     print("Flushing Buffer");
     print("${faceBuffer.length}");
     await ExperimentLogger.logFaceData(faceBuffer, widget.recordingId, widget.currentRepetition);
+    faceBuffer.clear();
   }
 
   int? _rotationFlagForFrame({
@@ -526,11 +527,11 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
         appBar: 
           AppBar(
             title: 
-                    Text(
-                    widget.t(
-                      "Repetition ${widget.currentRepetition} / ${widget.repetitions}",
-                      "Wiederholung ${widget.currentRepetition} / ${widget.repetitions}",
-                    ),),
+              Text(
+                widget.t(
+                  "Repetition ${widget.currentRepetition} / ${widget.repetitions}",
+                  "Wiederholung ${widget.currentRepetition} / ${widget.repetitions}",
+                ),),
           automaticallyImplyLeading: false,
           actions: [
             IconButton(
@@ -701,7 +702,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
     int lastMatchEnd = 0;
 
     for (final match in regex.allMatches(text)) {
-      
+
       // Text vor den Anführungszeichen
       if (match.start > lastMatchEnd) {
         spans.add(

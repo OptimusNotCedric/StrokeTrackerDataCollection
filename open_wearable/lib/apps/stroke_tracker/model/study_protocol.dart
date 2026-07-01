@@ -79,7 +79,7 @@ class StudyProtocol {
         "Instruct the patient double-tap the right Earable with the left Hand twice",
         "Lesen Sie vor:\"Legen Sie ihre Hände vor Ihnen hin und bewegen Sie ihren Kopf in der folgenden Aufgabe nicht. Sie werden einen Ton auf einer Seite der Hörer hören, bitte tippen Sie mit Ihrer gegnüberliegendenden Hand zweimal kurz hintereinander auf diesen Hörer.\"\n"
         "1. Starten Sie die Aufnahme.\n"
-        "2. Warten Sie, bis der Proband die Bewegung mit der linken Hand zum rechtne Hörer ausgeführt hat.\n"
+        "2. Warten Sie, bis der Proband die Bewegung mit der linken Hand zum rechten Hörer ausgeführt hat.\n"
         "3. Stoppen Sie die Aufnahme."
       ),
       t(
