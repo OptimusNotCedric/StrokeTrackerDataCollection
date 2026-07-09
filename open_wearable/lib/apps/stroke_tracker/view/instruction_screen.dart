@@ -5,6 +5,7 @@ import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/repetition_screen.dart';
 
+///Setup_Page for the exercises
 class EarbudSealTestScreen extends StatefulWidget {
   final String heading;
   final String description;
@@ -61,6 +62,7 @@ class _EarbudSealTestScreenState extends State<EarbudSealTestScreen> {
     );
   }
 
+  ///Checks the seal
   Future<void> checkSeal(bool isLeft) async {
   setState(() => isMeasuring = true);
 
@@ -76,7 +78,7 @@ class _EarbudSealTestScreenState extends State<EarbudSealTestScreen> {
 
   });
 }
-
+  ///Jumps to next step in setup
   void nextStep() {
     switch (step) {
       case EarStep.left:
@@ -152,6 +154,7 @@ Widget build(BuildContext context) {
   );
 }
 
+///builds the buttons to continue
 Widget _buildBottomButton() {
   switch (step) {
 
@@ -181,7 +184,7 @@ Widget _buildBottomButton() {
   }
 }
 
-
+///Builds the page for the curretn step
 Widget _buildStep() {
   return Column(
     mainAxisSize: MainAxisSize.min,

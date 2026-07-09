@@ -5,7 +5,12 @@ import 'package:open_wearable/apps/stroke_tracker/controller/manager.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
 import 'package:flutter/services.dart';
 
-
+/// Screen responsible for guiding the examiner through a single
+/// measurement repetition.
+///
+/// The screen displays the measurement instructions, starts and stops
+/// sensor recording, manages the recording timer, optionally plays an
+/// audio cue, and asks whether the measurement should be saved or repeated.
 class MeasuringScreen extends StatefulWidget {
   final int repetitions;
   final int currentRepetition;
@@ -54,6 +59,14 @@ class MeasuringScreen extends StatefulWidget {
   State<MeasuringScreen> createState() => _MeasuringScreenState();
 }
 
+/// State implementation for [MeasuringScreen].
+///
+/// Handles the complete measurement workflow including:
+/// - starting and stopping recordings,
+/// - countdown timer management,
+/// - audio playback,
+/// - user confirmation dialogs,
+/// - synchronization with the experiment manager.
 class _MeasuringScreenState extends State<MeasuringScreen> {
   bool recording = false;
   late final String Function(String en,String de) t;
@@ -61,10 +74,14 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
   Timer? _timer;
   bool isStarting = false;
 
+  /// Plays the audio cue on the left Earable.
   Future<void> playLeft() async {
   await widget.manager.playSound(left:true);
-} 
+  } 
 
+  /// Shows a confirmation dialog before leaving the study.
+  ///
+  /// Prevents accidental termination of an ongoing experiment.
   Future<void> _onLeavePressed() async {
     final shouldLeave = await showDialog<bool>(
       context: context,
@@ -96,9 +113,10 @@ class _MeasuringScreenState extends State<MeasuringScreen> {
     }
   }
 
-Future<void> playRight() async {
-  await widget.manager.playSound(left:false);
-}
+  /// Plays the audio cue on the right Earable.
+  Future<void> playRight() async {
+    await widget.manager.playSound(left:false);
+  }
 
   @override
   void initState() {
@@ -111,6 +129,14 @@ Future<void> playRight() async {
     );
   }
 
+  /// Starts the measurement.
+  ///
+  /// This method:
+  /// - configures and starts all sensors,
+  /// - waits until every device is ready,
+  /// - optionally plays an audio cue,
+  /// - starts the countdown timer,
+  /// - logs the recording start event.
   Future<void> _startRecording() async {
     
     if (isStarting) return;
@@ -162,7 +188,9 @@ Future<void> playRight() async {
     }
   }
 
-    Future<bool?> _showSaveDialog() async {
+  /// Asks the examiner whether the recorded measurement should be
+  /// saved or repeated.
+  Future<bool?> _showSaveDialog() async {
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -193,6 +221,10 @@ Future<void> playRight() async {
     );
   }
   
+  /// Stops the current measurement.
+  ///
+  /// Stops all sensors, logs the recording end, cancels the countdown,
+  /// and lets the examiner decide whether to keep or repeat the recording.
   Future<void> _stopRecording() async {
     if (!recording) {
       return;
@@ -230,7 +262,10 @@ Future<void> playRight() async {
   }
 
   
-
+  /// Cleans up resources before leaving the screen.
+  ///
+  /// Stops active recordings, cancels the countdown timer,
+  /// and restores the experiment state.
   @override
   void dispose() {
     widget.stopMeasuring();
@@ -239,6 +274,9 @@ Future<void> playRight() async {
     super.dispose();
   }
 
+  /// Starts the measurement countdown.
+  ///
+  /// The recording is stopped automatically once the timer reaches zero.
   void _startTimer() {
     countdown = widget.timer;
 
@@ -419,6 +457,10 @@ Future<void> playRight() async {
       ));
   }
 
+  /// Formats examiner instructions for display.
+  ///
+  /// Text enclosed in quotation marks is rendered in italics to
+  /// distinguish spoken instructions from procedural steps.
   Widget buildInstructionText(String text) {
     final regex = RegExp(r'"([^"]*)"');
     final spans = <TextSpan>[];

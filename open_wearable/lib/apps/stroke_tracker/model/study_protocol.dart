@@ -35,7 +35,11 @@ class StudyProtocol {
     type: StudyStepType.cameraMeasurement,
     repetitions: 15,
     description:  t(
-   "Align the face inside the Camera",
+   "1. Position the camera so that the participant's face is centered within the green frame.\n"
+    "2. Start the recording.\n"
+    "3. Read aloud: \"Please look into the camera and smile, showing your teeth.\"\n"
+    "4. After the participant has smiled for at least 3 seconds, read aloud: \"You may stop smiling now.\"\n"
+    "5. Stop the recording.",
    "1. Positionieren Sie die Kamera so, dass das Gesicht des Probanden im grünen Rahmen liegt.\n"
    "2. Starten Sie die Aufnahme\n"
    "3. Lesen Sie vor: \"Schauen Sie in die Kamera und lächeln Sie mit sichtbaren Zähnen\"\n"
@@ -52,7 +56,11 @@ class StudyProtocol {
     type: StudyStepType.measuringHead,
     measuringInstructions: [
       t(
-        "Instruct the patient to start with the head in a neutral position, then turn it to the right, back to neutral, and then to the left, and back to neutral.",
+        "1. Instruct the participant to bring their head to a neutral position and look straight ahead.\n"
+      "2. Start the recording.\n"
+      "3. Read aloud: \"Turn your head to the right and return to the center. Then turn your head to the left and return to the center.\"\n"
+      "4. Ensure that the participant completes the full movement.\n"
+      "5. Stop the recording.",
         "Lesen Sie vor: \"Bringen Sie Ihren Kopf in eine aufrechte Position und schauen Sie nach vorne.\"\n"
         "1. Starten Sie die Aufnahme.\n"
         "2. Lesen Sie vor: \"Drehen Sie Ihren Kopf nach rechts und zurück zur Mitte. Drehen Sie danach Ihren Kopf nach links und zurück zur Mitte.\"\n"
@@ -60,7 +68,11 @@ class StudyProtocol {
         "4. Stoppen Sie die Aufnahme."
       ),
       t(
-        "Instruct the patient to start with the head in a neutral position, then turn it to the left, back to neutral, and then to the right, and back to neutral.",
+        "1. Instruct the participant to bring their head to a neutral position and look straight ahead.\n"
+      "2. Start the recording.\n"
+      "3. Read aloud: \"Turn your head to the left and return to the center. Then turn your head to the right and return to the center.\"\n"
+      "4. Ensure that the participant completes the full movement.\n"
+      "5. Stop the recording.",
         "Lesen Sie vor: \"Bringen Sie Ihren Kopf in eine aufrechte Position und schauen Sie nach vorne.\"\n"
         "1. Starten Sie die Aufnahme.\n"
         "2. Lesen Sie vor: \"Drehen Sie Ihren Kopf nach links und zurück zur Mitte. Drehen Sie danach Ihren Kopf nach rechts und zurück zur Mitte.\"\n"
@@ -78,14 +90,20 @@ class StudyProtocol {
     type: StudyStepType.measuringTap,
     measuringInstructions: [
       t(
-        "Instruct the patient double-tap the right Earable with the left Hand twice",
+        "1. Read aloud: \"Place your hands in front of you and keep your head still during the following task. You will hear a sound in one of the earbuds. Please use the opposite hand to double-tap that earbud.\"\n"
+      "2. Start the recording.\n"
+      "3. Wait until the participant has double-tapped the right Earable with their left hand.\n"
+      "4. Stop the recording.",
         "Lesen Sie vor:\"Legen Sie ihre Hände vor Ihnen hin und bewegen Sie ihren Kopf in der folgenden Aufgabe nicht. Sie werden einen Ton auf einer Seite der Hörer hören, bitte tippen Sie mit Ihrer gegnüberliegendenden Hand zweimal kurz hintereinander auf diesen Hörer.\"\n"
         "1. Starten Sie die Aufnahme.\n"
         "2. Warten Sie, bis der Proband die Bewegung mit der linken Hand zum rechten Hörer ausgeführt hat.\n"
         "3. Stoppen Sie die Aufnahme."
       ),
       t(
-        "Instruct the patient double-tap the right Earable with the left Hand twice",
+        "1. Read aloud: \"Place your hands in front of you and keep your head still during the following task. You will hear a sound in one of the earbuds. Please use the opposite hand to double-tap that earbud.\"\n"
+      "2. Start the recording.\n"
+      "3. Wait until the participant has double-tapped the left Earable with their right hand.\n"
+      "4. Stop the recording.",
         "Lesen Sie vor:\"Legen Sie ihre Hände vor Ihnen hin und bewegen Sie ihren Kopf in der folgenden Aufgabe nicht. Sie werden einen Ton auf einer Seite der Hörer hören, bitte tippen Sie mit Ihrer gegnüberliegendenden Hand zweimal kurz hintereinander auf diesen Hörer.\"\n"
         "1. Starten Sie die Aufnahme.\n"
         "2. Warten Sie, bis der Proband die Bewegung mit der rechten Hand zum linken Hörer ausgeführt hat.\n"

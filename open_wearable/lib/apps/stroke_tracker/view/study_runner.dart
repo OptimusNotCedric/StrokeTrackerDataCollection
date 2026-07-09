@@ -21,10 +21,11 @@ import 'package:open_wearable/apps/stroke_tracker/view/test_selection.dart';
 
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 
-
-
-
-
+/// Coordinates the execution of the complete stroke assessment study.
+///
+/// The study runner initializes the experiment, manages navigation between
+/// study steps, configures wearable sensors, and launches the appropriate
+/// measurement screens.
 class StudyRunner extends StatefulWidget {
   final StudyProtocol protocol;
   final ExperimentLogger logger;
@@ -80,7 +81,11 @@ class _StudyRunnerState extends State<StudyRunner> {
 
   }
 
-  //takes 100-500ms
+  ///// Loads and starts the face detection isolate.
+  ///
+  /// The detector is initialized once and reused for all camera-based
+  /// measurements
+  /// takes up to 1 second soruce: face_detection_tflite documentation
   Future<void> _loadConfigureFaceDetector() async {
     try {
       _faceDetectorIsolate = await FaceDetectorIsolate.spawn(
@@ -93,7 +98,10 @@ class _StudyRunnerState extends State<StudyRunner> {
     setState(() {});
   }
   
-
+  /// Creates the experiment configuration and initializes the
+  /// [ExperimentManager].
+  ///
+  /// Defines the sampling frequencies for all sensors used during the study.
   Future<void> _loadConfigAndInitManager() async {
     final sensorConfigs = [
       SensorConfig(sensor: "imu", sampleRate: 50),
@@ -118,6 +126,10 @@ class _StudyRunnerState extends State<StudyRunner> {
     );
   }
 
+  /// Starts a synchronized measurement.
+  ///
+  /// Creates a unique recording identifier, starts experiment logging,
+  /// configures all required wearable sensors, and begins sensor recording.
   Future<void> _startMeasuring(bool useRing) async {
     //await _manager.deactivateSensors(); // <-- wichtig
     final step = _steps[_currentIndex];
@@ -164,27 +176,32 @@ class _StudyRunnerState extends State<StudyRunner> {
   }
 
   Future<bool?> showContinueDialog(BuildContext context) {
-  return showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text(widget.protocol.t('Continue?','Weiter?')),
-        content: Text(widget.protocol.t('Do you want to continue taking measurements?','Wollen Sie weitere Messung durchführen?')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(widget.protocol.t('No', 'Nein')),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(widget.protocol.t('Yes', 'Ja')),
-          ),
-        ],
-      );
-    },
-  );
-}
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(widget.protocol.t('Continue?','Weiter?')),
+          content: Text(widget.protocol.t('Do you want to continue taking measurements?','Wollen Sie weitere Messung durchführen?')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(widget.protocol.t('No', 'Nein')),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(widget.protocol.t('Yes', 'Ja')),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
+  /// Finalizes the current measurement.
+  ///
+  /// Stops logging, presents the assessment screen, updates the repetition
+  /// counter, and advances to the next study step when all repetitions have
+  /// been completed.
   Future<void> _saveAndAdvance() async {
 
     _logger.logTaskEnd();

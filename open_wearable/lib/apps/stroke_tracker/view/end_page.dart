@@ -3,6 +3,7 @@ import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'dart:io';
 import 'package:share_plus/share_plus.dart';
 
+///Class for the the Last page of the Study
 class SummaryScreen extends StatefulWidget {
   final VoidCallback onLeaveStudy;
   final String Function(String en,String de) t;

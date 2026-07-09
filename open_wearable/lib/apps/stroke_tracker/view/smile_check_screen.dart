@@ -7,6 +7,11 @@ import 'package:face_detection_tflite/face_detection_tflite.dart';
 import 'package:open_wearable/apps/stroke_tracker/controller/manager.dart';
 import 'package:opencv_dart/opencv_dart.dart' as cv;
 
+/// Screen for camera-based facial movement recordings.
+///
+/// This screen displays the live camera preview, records synchronized
+/// sensor data, performs real-time face detection, buffers facial
+/// landmarks, and stores the captured data after each measurement.
 class CameraMeasuringScreen extends StatefulWidget {
   final int repetitions;
   final int currentRepetition;
@@ -60,6 +65,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
   int countdown = 10;
   Timer? _timer;
 
+  /// Initializes the camera and enables immersive fullscreen mode.
   @override
   void initState() {
     super.initState();
@@ -71,6 +77,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
   
   }
 
+  /// Shows a confirmation dialog before terminating the study.
   Future<void> _onLeavePressed() async {
     final shouldLeave = await showDialog<bool>(
       context: context,
@@ -102,6 +109,9 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
     }
   }
 
+  /// Initializes the selected camera.
+  ///
+  /// Creates the camera controller and prepares it for image streaming.
   Future<void> _initCamera() async {
     try {
       final cameras = await availableCameras();
@@ -124,6 +134,12 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
     }
   }
 
+  /// Starts a synchronized measurement.
+  ///
+  /// Waits until all wearable sensors are ready, starts the camera image
+  /// stream, performs face detection on incoming frames, and begins the
+  /// recording countdown.
+  /// 
   Future<void> _startVideoRecording() async {
     if (_initializeControllerFuture != null) {
       await _initializeControllerFuture;
@@ -145,6 +161,7 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
         });
         return;
       }
+
     DateTime lastLoggedTime = DateTime.now().subtract(Duration(seconds: 1));
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       debugPrint("Kamera nicht bereit für Aufnahme.");
@@ -185,8 +202,6 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
 
         });
       
-      
-      
       setState(() {
         recording = true;
       });
@@ -203,7 +218,8 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
       debugPrint("Fehler beim Starten der Videoaufnahme: $e");
     }
   }
-  // Erstellt ein Bild und zeichnet alle Landmarks auf diesem mit Nummer auf 
+
+  
   /* 
   Future<void> _saveDebugMeshImage(cv.Mat mat, Face face) async {
     try {
@@ -352,6 +368,8 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
   /// - Android I420 (3 planes): YUV420 with separate U/V planes
   /// - Desktop BGRA/RGBA (1 plane): camera_desktop provides packed 4-channel
   ///   (macOS = BGRA byte order, Linux = RGBA byte order)
+  /// 
+  /// @source is the programmign exampel of the face_detection_tflite library
   Future<cv.Mat?> _convertCameraImageToMat(CameraImage image) async {
     try {
       final int width = image.width;
@@ -462,6 +480,9 @@ class _CameraMeasuringScreenState extends State<CameraMeasuringScreen> {
     }
   }
 
+  /// Writes all buffered face detections to persistent storage.
+  ///
+  /// After successful export, the in-memory buffer is cleared.
   Future<void> flushBuffer() async {
     print("Flushing Buffer");
     print("${faceBuffer.length}");

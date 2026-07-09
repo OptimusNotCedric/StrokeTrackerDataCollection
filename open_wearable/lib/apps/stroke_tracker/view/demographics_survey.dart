@@ -171,18 +171,20 @@ class _DemographicsSurveyState extends State<DemographicsSurvey> {
     ));
   }
 
+  ///Finishes survery if all options are filled out, used for the continue button
   void _continueButtonPressed(){
       if(_isFilledOut()){
         _finishSurvey();
       }
   }
 
+  ///returns true if all mandatory options are filled out
   bool _isFilledOut(){
     return age > 0 && (genderChoice != null);
   }
 
 
-
+  ///Logs all survery Data and starts the Study part of the app
   Future<void> _finishSurvey() async {
     final results = <String, dynamic>{};
 

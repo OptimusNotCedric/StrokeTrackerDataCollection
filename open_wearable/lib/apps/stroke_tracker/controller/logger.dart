@@ -39,6 +39,8 @@ class StepEvent {
   }
 }
 
+/// Represents miscellaneous events that occur during an experiment,
+/// such as user interactions or system events.
 class OtherEvent {
   final int blockNumber;
   final String instruction;
@@ -69,6 +71,8 @@ class OtherEvent {
   }
 }
 
+/// Stores a synchronization event between a wearable device
+/// and the smartphone.
 class SyncEvent {
   final int deviceTimestamp;
   final DateTime phoneTimestamp;
@@ -89,6 +93,7 @@ class SyncEvent {
   }
 }
 
+///represents a single labeling
 class LabelEvent {
   final int labelValue;
   final int taskID;
@@ -115,7 +120,11 @@ class LabelEvent {
   }
 }
 
-/// Logger for ExperimentManager
+/// Records experiment metadata, task execution events,
+/// synchronization timestamps, labels, and face-tracking data.
+///
+/// Events are stored in memory during the experiment and written
+/// to CSV or binary files once recording has finished.
 class ExperimentLogger extends ChangeNotifier{
   static const String _stepsCsvHeader =
       'SessionID,Block,Task,DurationS,StartTime,EndTime,RelativeStartMS,RelativeEndMS';
@@ -141,6 +150,10 @@ class ExperimentLogger extends ChangeNotifier{
 
   File get csvFile => _stepsCsvFile;
 
+  /// Initializes logging for a new experiment session.
+  ///
+  /// Creates all required log files if they do not already exist and
+  /// stores the session start timestamp used for relative timing.
   Future<void> startLogging(bool sync, String newSessionID) async {
     sessionID = newSessionID;
     final dir = await getApplicationDocumentsDirectory();
@@ -167,18 +180,26 @@ class ExperimentLogger extends ChangeNotifier{
     }
     _sessionStartTime = DateTime.now();
   }
+
+  /// Logs the first synchronization event from the left earbud.
   void logSyncLeftEvent(int deviceTimestamp) {
     _logSyncEvent(deviceTimestamp, "L");
   }
 
+  /// Logs the first synchronization event from the right earbud.
   void logSyncRightEvent(int deviceTimestamp) {
     _logSyncEvent(deviceTimestamp, "R");
   }
 
+  /// Logs the first synchronization event from the ring device.
   void logSyncRingEvent(int deviceTimestamp) {
     _logSyncEvent(deviceTimestamp, "O");
   }
 
+  /// Creates a synchronization event.
+  ///
+  /// Stores both the wearable timestamp and the corresponding
+  /// phone timestamp to enable offline time alignment.
   void _logSyncEvent(int deviceTimestamp, String side) {
     final now = DateTime.now();
     final relative = now.difference(_sessionStartTime).inMilliseconds;
@@ -194,6 +215,9 @@ class ExperimentLogger extends ChangeNotifier{
     print("SYNC $side: ${event.toCsvRow(sessionID)}");
   }
 
+  /// Logs an arbitrary experiment event.
+  ///
+  /// Typical examples include Survey input, video events.
   void logOtherEvent(
     int blockNumber,
     String instruction,
@@ -214,6 +238,7 @@ class ExperimentLogger extends ChangeNotifier{
     _otherEvents.add(event);
   }
 
+  /// Stores the annotation assigned to one task repetition.
   void logLabel(
     int taskID,
     int value,
@@ -225,6 +250,7 @@ class ExperimentLogger extends ChangeNotifier{
     _label.add(event);
   }
 
+  /// Records the start of a task.
   void logTaskStart(
     int blockNumber,
     String taskId,
@@ -241,6 +267,7 @@ class ExperimentLogger extends ChangeNotifier{
     _stepEvents.add(event);
   }
 
+  /// Records the end of a task.
   void logTaskEnd() {
     if (_stepEvents.isEmpty) return;
     final now = DateTime.now();
@@ -255,6 +282,9 @@ class ExperimentLogger extends ChangeNotifier{
     if (_stepEvents.isNotEmpty) _stepEvents.removeLast();
   }
 
+  /// Writes all buffered events to disk.
+  ///
+  /// After successful writing, all in-memory event buffers are cleared.
   Future<void> stopAndWriteLogging(bool sync) async {
     print("Finalizing experiment");
 
@@ -354,7 +384,7 @@ class ExperimentLogger extends ChangeNotifier{
     print("ApplicationDocumentsDirectory cleared");
   }
 
-
+  ///deletes all stored log files
   static Future<void> deleteAllLogFiles() async {
     final dir = await getApplicationDocumentsDirectory();
 
@@ -365,6 +395,9 @@ class ExperimentLogger extends ChangeNotifier{
     await dir.create();
   }
 
+  /// Copies all log files into another directory.
+  ///
+  /// Existing files are overwritten.
   static Future<void> copyToOther(String dirPath) async {
     List<File> sourceFiles = await getAllLogFiles();
     for (File file in sourceFiles) {
@@ -379,6 +412,7 @@ class ExperimentLogger extends ChangeNotifier{
     }
   }
 
+  /// Converts a detected face bounding box into a comma-separated string.
   static String boundingBoxToString(BoundingBox box) {
     return [
       box.topLeft.x,box.topLeft.y,
@@ -389,6 +423,7 @@ class ExperimentLogger extends ChangeNotifier{
     ].join(',');
   }
 
+  /// Converts all facial landmarks into a comma-separated string.
   static String faceMeshToString(FaceMesh mesh) {
     final values = <String>[];
 
@@ -406,6 +441,10 @@ class ExperimentLogger extends ChangeNotifier{
   return values.join(',');
   }
 
+  /// Stores face-tracking data for one recording.
+  ///
+  /// The current implementation writes a compact binary representation.
+  /// The CSV implementation is retained for reference.
   static Future<void> logFaceData(
   List<(DateTime, Face, int, int)> faces,
   String sessionId,
@@ -457,6 +496,16 @@ class ExperimentLogger extends ChangeNotifier{
     await sink.close(); */
   }
 
+  /// Stores face-tracking data in a compact binary format.
+  ///
+  /// Each record contains:
+  /// - repetition number
+  /// - timestamp
+  /// - image dimensions
+  /// - face bounding box
+  /// - facial landmark coordinates
+  ///
+  /// Binary storage is significantly smaller than CSV.
    static Future<void> logFaceDataBinary(
   List<(DateTime, Face, int, int)> faces,
   String sessionId,
@@ -528,6 +577,7 @@ class ExperimentLogger extends ChangeNotifier{
   await sink.close();
 }
 
+  /// Returns every stored face-tracking file.
   static Future<List<File>> getAllFaceData() async {
     final directory = await getApplicationDocumentsDirectory();
     final files = <File>[];

@@ -7,6 +7,16 @@ import 'package:open_wearable/apps/stroke_tracker/model/config.dart';
 import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 import 'package:path_provider/path_provider.dart';
 
+/// Manages the complete lifecycle of a study.
+///
+/// Responsibilities include:
+/// - Configuring sensors on both OpenEarable devices and the ring.
+/// - Synchronizing timestamps between devices.
+/// - Starting sensor streaming and recording.
+/// - Waiting until all devices are ready.
+/// - Logging synchronization events.
+/// - Cleaning up sensor subscriptions after an experiment.
+/// class adapted and changed from https://github.com/maxbrzr/app/tree/csp-refactor/open_wearable/lib/apps/chew_side_detection manager
 class ExperimentManager extends ChangeNotifier{
   final ExperimentLogger logger;
   final ExperimentConfig expConfig;
@@ -35,6 +45,10 @@ class ExperimentManager extends ChangeNotifier{
   StreamSubscription<SensorValue>? _rightSubscription;
   StreamSubscription<SensorValue>? _ringSubscription;
 
+  /// Creates a new experiment manager.
+  ///
+  /// Initializes lookup tables that map sensor names to their
+  /// corresponding sensor configuration objects.
   ExperimentManager({
     required this.logger,
     required this.expConfig,
@@ -74,6 +88,10 @@ class ExperimentManager extends ChangeNotifier{
     
   }
 
+  /// Sets the filename prefix for the recordings on the Openearable Devices.
+  ///
+  /// left device prefix `L`
+  /// right device `R`.
   Future<void> setSensorLogFilePrefix(String prefix) async {
     
     if (leftWearable is! EdgeRecorderManager) {
@@ -216,6 +234,9 @@ class ExperimentManager extends ChangeNotifier{
     _imuCsvWriter = ImuCsvWriter();
     await _imuCsvWriter.init(sessionId, taskNumber, repetitionNumber);
     }
+
+    // These completers are fulfilled once the first sensor sample arrives.
+    // This guarantees that recording only starts after every device is active.
     _leftReady = Completer<void>();
     _rightReady = Completer<void>();
     _ringReady = Completer<void>();
@@ -347,6 +368,7 @@ class ExperimentManager extends ChangeNotifier{
     return (leftSelectedCfgs, rightSelectedCfgs);
   }
 
+  /// Plays the audio response measurement on one earbud.
   Future<void> playSound({required bool left}) async {
   OpenEarableV2 wearable = left ? leftWearable : rightWearable;
   try {
@@ -367,6 +389,7 @@ class ExperimentManager extends ChangeNotifier{
     }
 }
 
+  /// Synchronizes the clocks of all connected devices.
   Future<void> synchronizeTime() async {
     leftWearable.requireCapability<TimeSynchronizable>().synchronizeTime();
     rightWearable.requireCapability<TimeSynchronizable>().synchronizeTime();
@@ -435,6 +458,9 @@ class ExperimentManager extends ChangeNotifier{
     ]);
   }
   
+  /// Runs the audio-based seal check on one earbud.
+  ///
+  /// Returns the raw result
   Future<Map<String, dynamic>?> runSealCheck(bool isLeft) async {
     OpenEarableV2 wearable = isLeft ? leftWearable : rightWearable;
     Map<String, dynamic>? data;
@@ -458,6 +484,7 @@ class ExperimentManager extends ChangeNotifier{
   }
 }
 
+/// Helper class that stores streamed ring IMU data as a CSV file.
 class ImuCsvWriter {
   late File _file;
   late IOSink _sink;

@@ -9,9 +9,7 @@ import 'package:open_wearable/view_models/sensor_configuration_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
-
-
-
+///class for start of the app for language selection and participant-ID
 class StudySelection extends StatefulWidget {
   // Hinzufügen der benötigten Parameter
   final OpenEarableV2 leftWearable;

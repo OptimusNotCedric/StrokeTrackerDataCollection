@@ -3,6 +3,7 @@ import 'package:open_wearable/apps/stroke_tracker/controller/logger.dart';
 import 'dart:io';
 import 'package:share_plus/share_plus.dart';
 
+/// Class for the download page at the front 
 class DownloadScreen extends StatefulWidget {
   const DownloadScreen({super.key});
   
@@ -69,6 +70,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
     );
   }
 
+  //exports all data for the type of data selected
   Future<void> _exportAll(String type) async {
     List<File> files;
 
@@ -94,7 +96,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
     );
   }
   
-  // ================= DELETE =================
+  // Deletes all logs
   Future<void> _deleteLogs() async {
     await ExperimentLogger.deleteAllLogFiles();
     if (mounted) {

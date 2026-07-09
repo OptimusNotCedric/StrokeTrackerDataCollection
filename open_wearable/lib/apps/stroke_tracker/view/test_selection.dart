@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
 
+/// Screen for selecting one of the available study tasks.
+///
+/// Displays the available measurement tasks together with their current
+/// completion progress and allows the examiner to continue a specific task
+/// or finish the study.
 class TestSelectionScreen extends StatelessWidget {
   final VoidCallback onSmileTest;
   final VoidCallback onHeadTurnTest;
@@ -130,6 +135,10 @@ class TestSelectionScreen extends StatelessWidget {
     ));
   }
 
+  /// Returns whether all required repetitions have been completed.
+  ///
+  /// Returns `true` only if every study task has reached its required
+  /// number of repetitions.
   bool studyReady() {
     bool isReady = true;
     for (var step in steps) {

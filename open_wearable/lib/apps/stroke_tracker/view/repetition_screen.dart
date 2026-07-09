@@ -4,6 +4,11 @@ import 'package:open_wearable/apps/stroke_tracker/controller/manager.dart';
 import 'package:open_wearable/apps/stroke_tracker/model/study_step.dart';
 import 'package:open_wearable/apps/stroke_tracker/view/sealcheck.dart';
 
+/// A reusable five-point Likert scale widget.
+///
+/// Allows the examiner to rate the severity of an observed abnormality.
+/// The selected score is reported to the parent widget through
+/// [onScoreChanged].
 class LikertChoice extends StatefulWidget{
   final Function(int) onScoreChanged;
   final int initialScore;
@@ -64,7 +69,11 @@ class _LikertChoiceState extends State<LikertChoice> {
   }
 }
 
-
+/// Screen for rating the observed abnormality after completing a
+/// measurement.
+///
+/// The examiner assigns a score using a Likert scale and,
+/// when applicable, selects the affected side
 class TaskScreen extends StatefulWidget{
   final int currentRepetition;
   final int maxRepetition;
@@ -115,6 +124,9 @@ class _TaskScreenState extends State<TaskScreen> {
     
   }
 
+  /// Shows a confirmation dialog before leaving the study.
+  ///
+  /// Prevents accidental termination of an ongoing experiment.
   Future<void> _onLeavePressed() async {
     final shouldLeave = await showDialog<bool>(
       context: context,
@@ -233,7 +245,7 @@ class _TaskScreenState extends State<TaskScreen> {
                     pressExitButton();
                    }  : null,
                 child: Text(
-                  t("Next repetition", "Nächste Wiederholung Starten")
+                  t("Next Repetition", "Nächste Wiederholung Starten")
                 ),),
                 SizedBox(width: 10),
                 ElevatedButton(
@@ -255,14 +267,17 @@ class _TaskScreenState extends State<TaskScreen> {
     return LikertChoice(onScoreChanged: onScoreChanged, initialScore: 0, t: widget.translate,);
   }
 
+  /// Updates the selected severity score.
   void onScoreChanged(int newScore) {
     setState(() {
       score = newScore;
     });
   }
 
-  
-
+  /// Returns whether the examiner has completed all required inputs.
+  ///
+  /// A body side must additionally be selected for scores above 3
+  /// indicating that an abnormality is present.
   bool canGoNext() {
     return score > 0 ? (score >= 4 ? (selectedSide != null? true :false) : true) : false;
   }
@@ -319,8 +334,10 @@ class _TaskScreenState extends State<TaskScreen> {
     );
   }
 
-
-
+  /// Saves the current assessment and returns to the previous screen.
+  ///
+  /// The selected severity, affected side, repetition number, and task
+  /// information are written to the experiment log before leaving.
   Future<void> pressExitButton() async{
     
     widget.logger.logLabel(widget.currentStepNumber,score,selectedSide,widget.currentRepetition,widget.instruction);
